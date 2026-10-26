@@ -83,6 +83,8 @@ github.com/ncruces/go-strftime v1.1.0 h1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL
 github.com/ncruces/go-strftime v1.1.0/go.mod h1:yVaq7iwCN09vHRrKBrrflXT0M9tTMG2KmZ9Fj7xeG/g=
 github.com/notweuz/rcon-scheduler-core v0.1.0 h1:Zugpg3VCzHL9dX/YKftdidib8/LzVQ+cv7b6JJCTPS8=
 github.com/notweuz/rcon-scheduler-core v0.1.0/go.mod h1:hsgaM2nMxamzaxrbww2qMJAgcRABLimNMIzBPkgTTZY=
+github.com/notweuz/rcon-scheduler-core v0.4.0 h1:fFMXX74VbVHHLqTpbgfMt6pX+STmtOvFFw/RHERcGA0=
+github.com/notweuz/rcon-scheduler-core v0.4.0/go.mod h1:/Vlyb83Q9wa59PMi28KiKTxt3mTt9NpP7kghBxw9Oso=
 github.com/pelletier/go-toml/v2 v2.4.3 h1:GTRvJQutkOSftxIFD5xw9aepkYNuPWmVJpffdDPYVpY=
 github.com/pelletier/go-toml/v2 v2.4.3/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
