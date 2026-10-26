@@ -39,6 +39,7 @@ func NewApp(cfg *config.Config) (App, error) {
 	}
 
 	validation.Register()
+	// s := NewScheduler(cfg)
 
 	r := gin.New()
 	r.Use(middleware.Logger())

@@ -12,6 +12,7 @@ type Config struct {
 	JWTSecret   string `mapstructure:"JWT_SECRET"`
 	LogLevel    string `mapstructure:"LOG_LEVEL"`
 	AppPort     int    `mapstructure:"APP_PORT"`
+	Timezone	string `mapstructure:"TIMEZONE"`
 }
 
 func NewConfig(path string) (*Config, error) {
@@ -25,6 +26,7 @@ func NewConfig(path string) (*Config, error) {
 	v.SetDefault("APP_PORT", 8080)
 	v.SetDefault("JWT_SECRET", "secret")
 	v.SetDefault("DATABASE_DSN", "host=localhost user=postgres password=postgres dbname=rcon-scheduler-panel port=5432 sslmode=disable")
+	v.SetDefault("TIMEZONE", "Europe/Moscow")
 
 	err := v.ReadInConfig()
 	if err != nil {
@@ -32,7 +34,7 @@ func NewConfig(path string) (*Config, error) {
 	}
 
 	var cfg Config
-	err = v.Unmarshal(&cfg)
+	err = v.Unmarshal(&cfg) // TODO: validate the config using UnmarshalExact and parsing validation fails
 	if err != nil {
 		return nil, err
 	}
