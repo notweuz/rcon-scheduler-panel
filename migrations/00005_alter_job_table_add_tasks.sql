@@ -1,7 +1,7 @@
 -- +goose Up
 ALTER TABLE jobs 
     ADD COLUMN steps JSONB NOT NULL DEFAULT '[]'::jsonb
-        CHECK (jsonb_typeof(steps) = 'array')
+        CHECK (jsonb_typeof(steps) = 'array');
 
 -- +goose Down
 ALTER TABLE jobs DROP COLUMN steps;
