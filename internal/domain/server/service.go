@@ -9,8 +9,8 @@ import (
 
 type Repository interface {
 	Create(ctx context.Context, srv *model.Server) error
-	GetByID(ctx context.Context, id int64) (*model.Server, error)
-	GetAll(ctx context.Context) ([]model.Server, error)
+	GetByID(ctx context.Context, id int64, opts ...Option) (*model.Server, error)
+	GetAll(ctx context.Context, opts ...Option) ([]model.Server, error)
 }
 
 type service struct {
