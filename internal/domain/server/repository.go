@@ -31,7 +31,7 @@ func (r *repository) GetByID(ctx context.Context, id int64) (*model.Server, erro
 	var s model.Server
 	if err := r.db.WithContext(ctx).First(&s, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("get server: %w", err)
+			return nil, fmt.Errorf("get server %d: %w", id, ErrNotFound)
 		}
 		return nil, fmt.Errorf("get server: %w", err)
 	}
