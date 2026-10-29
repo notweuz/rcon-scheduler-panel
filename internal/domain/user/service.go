@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"errors"
-	"fmt"
 	"rcon-scheduler-panel/internal/errs"
 	"rcon-scheduler-panel/internal/model"
 )
@@ -27,7 +26,7 @@ func (s *service) Create(ctx context.Context, u *model.User) error {
 		if errors.Is(err, ErrAlreadyExists) {
 			return errs.ErrConflict.WithMessage("user already exists").WithErr(err)
 		}
-		return fmt.Errorf("create user: %w", err)
+		return err
 	}
 	return nil
 }
@@ -38,7 +37,7 @@ func (s *service) GetByID(ctx context.Context, id int64) (*model.User, error) {
 		if errors.Is(err, ErrNotFound) {
 			return nil, errs.ErrNotFound.WithMessage("user not found").WithErr(err)
 		}
-		return nil, fmt.Errorf("get user: %w", err)
+		return nil, err
 	}
 	return u, nil
 }
@@ -49,7 +48,7 @@ func (s *service) GetByUsername(ctx context.Context, username string) (*model.Us
 		if errors.Is(err, ErrNotFound) {
 			return nil, errs.ErrNotFound.WithMessage("user not found").WithErr(err)
 		}
-		return nil, fmt.Errorf("get user by username: %w", err)
+		return nil, err
 	}
 	return u, nil
 }
