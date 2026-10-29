@@ -33,7 +33,7 @@ func (r *repository) GetByID(ctx context.Context, id int64) (*model.Server, erro
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("get server %d: %w", id, ErrNotFound)
 		}
-		return nil, fmt.Errorf("get server: %w", err)
+		return nil, fmt.Errorf("get server %d: %w", id, err)
 	}
 	return &s, nil
 }
