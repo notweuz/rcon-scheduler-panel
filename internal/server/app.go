@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"rcon-scheduler-panel/internal/config"
 	"rcon-scheduler-panel/internal/domain/auth"
+	"rcon-scheduler-panel/internal/domain/job"
 	"rcon-scheduler-panel/internal/domain/user"
 	"rcon-scheduler-panel/internal/middleware"
 	"rcon-scheduler-panel/internal/server/database"
@@ -54,9 +55,16 @@ func NewApp(cfg *config.Config) (App, error) {
 	api := r.Group("/api")
 
 	userRepo := user.NewRepository(db)
+	jobRepo := job.NewRepository(db)
 	userSVC := user.NewService(userRepo)
 	authSVC := auth.NewService(userSVC, cfg)
-	MakeRoutes(api, auth.NewHandler(authSVC), user.NewHandler(userSVC, cfg))
+	jobSVC := job.NewService(jobRepo)
+	
+	MakeRoutes(api, 
+		auth.NewHandler(authSVC), 
+		user.NewHandler(userSVC, cfg), 
+		job.NewHandler(jobSVC, cfg),
+	)
 
 	srv := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.AppPort),
