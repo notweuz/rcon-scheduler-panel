@@ -1,18 +1,21 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type Server struct {
 	ID          int64  `gorm:"primaryKey"`
-	Name        string `gorm:"not null"`
-	Address     string `gorm:"not null"`
-	Password    string `gorm:"not null"`
-	ProtocolID  int64  `gorm:"not null"`
+	Name        string
+	Address     string
+	Port 		uint16
+	Password    string
+	ProtocolID  int64
 	Protocol    *Protocol
 	Description *string
 
-	CreatedAt time.Time `gorm:"not null"`
-	UpdatedAt time.Time `gorm:"not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (Server) TableName() string {

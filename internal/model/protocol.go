@@ -3,7 +3,6 @@ package model
 type Protocol struct {
 	ID          int64  `gorm:"primaryKey"`
 	Name        string `gorm:"not null"`
-	DefaultPort *int
 	Description *string
 }
 
