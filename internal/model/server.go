@@ -1,7 +1,10 @@
 package model
 
 import (
+	"strings"
 	"time"
+
+	"github.com/notweuz/rcon-scheduler-core/server"
 )
 
 type Server struct {
@@ -20,4 +23,26 @@ type Server struct {
 
 func (Server) TableName() string {
 	return "servers"
+}
+
+func (s Server) ToCore() server.Server { // TODO: apparently core itself should have parseType. Rewrite this after adding it to core
+	serverType := server.TypeSource
+
+	if s.Protocol != nil {
+		candidate := server.Type(strings.ToLower(strings.TrimSpace(s.Protocol.Name)))
+
+		switch candidate {
+		case server.TypeSource, server.TypeWebsocket, server.TypeTelnet:
+			serverType = candidate
+		}
+	}
+
+	srv := server.New(
+		s.Address,
+		int(s.Port),
+		s.Password,
+		serverType,
+	)
+
+	return srv
 }
