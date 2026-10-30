@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"rcon-scheduler-panel/internal/config"
+	"rcon-scheduler-panel/internal/dto/response"
 	"rcon-scheduler-panel/internal/middleware"
 	"rcon-scheduler-panel/internal/model"
 	"rcon-scheduler-panel/internal/transport/http/respond"
@@ -39,7 +40,7 @@ func (h *Handler) GetMe(c *gin.Context) {
 		respond.Error(c, err)
 		return
 	}
-	respond.OK(c, user) // TODO: Make user DTO's
+	respond.OK(c, response.UserShort{ID: user.ID, Username: user.Username})
 }
 
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
