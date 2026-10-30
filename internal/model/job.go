@@ -23,6 +23,10 @@ type Step struct {
 	Wait    string `json:"wait,omitempty"`
 }
 
+func (Job) TableName() string {
+	return "jobs"
+}
+
 func (j Job) ToCore() (corejob.Job, error) {
 	steps := make([]corejob.Step, len(j.Steps))
 
