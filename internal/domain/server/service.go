@@ -3,8 +3,12 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"rcon-scheduler-panel/internal/errs"
 	"rcon-scheduler-panel/internal/model"
+
+	"github.com/notweuz/rcon-scheduler-core/scheduler"
+	coreserver "github.com/notweuz/rcon-scheduler-core/server"
 )
 
 type Repository interface {
@@ -15,10 +19,11 @@ type Repository interface {
 
 type service struct {
 	repo Repository
+	sch  *scheduler.Scheduler
 }
 
-func NewService(repo Repository) Service {
-	return &service{repo: repo}
+func NewService(repo Repository, sch *scheduler.Scheduler) Service {
+	return &service{repo: repo, sch: sch}
 }
 
 func (s *service) Create(ctx context.Context, srv *model.Server) error {
@@ -28,6 +33,22 @@ func (s *service) Create(ctx context.Context, srv *model.Server) error {
 		}
 		return err
 	}
+
+	if err := s.sch.Register(srv.ToCore()); err != nil {
+		switch {
+		case errors.Is(err, scheduler.ErrServerExists):
+			return errs.ErrConflict.
+				WithMessage("server already registered").
+				WithErr(err)
+		case errors.Is(err, coreserver.ErrEmptyAddress),
+			errors.Is(err, coreserver.ErrInvalidPort),
+			errors.Is(err, scheduler.ErrUnsupportedType):
+			return errs.ErrBadRequest.WithMessage(err.Error()).WithErr(err)
+		default:
+			return fmt.Errorf("register server in scheduler: %w", err)
+		}
+	}
+	
 	return nil
 }
 
