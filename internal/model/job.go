@@ -9,13 +9,13 @@ import (
 
 type Job struct {
 	ID         int64 `gorm:"primaryKey"`
-	ServerID   int64 
+	ServerID   int64
 	Server     *Server
 	Name       string
 	Cron       string
 	LogResults bool
 
-	Steps []Step `gorm:"type:jsonb;serializer:json;not null"`
+	Steps []Step `gorm:"type:jsonb;serializer:json;not null;default:'[]'"`
 }
 
 type Step struct {
