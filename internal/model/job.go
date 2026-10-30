@@ -15,7 +15,7 @@ type Job struct {
 	Cron       string
 	LogResults bool
 
-	Steps []Step `gorm:"type:jsonb;serializer:json;not null;default:'[]'"`
+	Steps []Step `gorm:"serializer:json"`
 }
 
 type Step struct {
