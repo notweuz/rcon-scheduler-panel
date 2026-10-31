@@ -67,7 +67,7 @@ func (h *Handler) GetByServerID(c *gin.Context) {
 }
 
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
-	r.GET("/servers/:id/jobs", middleware.Auth(h.cfg), )
+	r.GET("/servers/:id/jobs", middleware.Auth(h.cfg), h.GetByServerID)
 	jobs := r.Group("/jobs", middleware.Auth(h.cfg))
 	{
 		jobs.GET("/:id", h.GetByID)
