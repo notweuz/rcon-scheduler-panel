@@ -11,6 +11,7 @@ type Repository interface {
 	Create(ctx context.Context, job *model.Job) error
 	GetByID(ctx context.Context, id int64) (*model.Job, error)
 	GetByServerID(ctx context.Context, serverID int64) ([]model.Job, error)
+	GetAll(ctx context.Context) ([]model.Job, error)
 }
 
 type service struct {
@@ -46,6 +47,19 @@ func (s *service) GetByID(ctx context.Context, id int64) (*model.Job, error) {
 
 func (s *service) GetByServerID(ctx context.Context, serverID int64) ([]model.Job, error) {
 	jobs, err := s.repo.GetByServerID(ctx, serverID)
+	if err != nil {
+		return nil, err
+	}
+
+	if jobs == nil {
+		jobs = []model.Job{}
+	}
+
+	return jobs, nil
+}
+
+func (s *service) GetAll(ctx context.Context) ([]model.Job, error) {
+	jobs, err := s.repo.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}

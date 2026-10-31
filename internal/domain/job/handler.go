@@ -17,6 +17,7 @@ type Service interface {
 	Create(ctx context.Context, job *model.Job) error
 	GetByID(ctx context.Context, id int64) (*model.Job, error)
 	GetByServerID(ctx context.Context, serverID int64) ([]model.Job, error)
+	GetAll(ctx context.Context) ([]model.Job, error)
 }
 
 type Handler struct {

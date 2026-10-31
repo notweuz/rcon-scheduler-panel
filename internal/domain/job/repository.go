@@ -41,6 +41,14 @@ func (r *repository) GetByID(ctx context.Context, id int64) (*model.Job, error) 
 func (r *repository) GetByServerID(ctx context.Context, serverID int64) ([]model.Job, error) {
 	var jobs []model.Job
 	if err := r.db.WithContext(ctx).Where("server_id = ?", serverID).Find(&jobs).Error; err != nil {
+		return nil, fmt.Errorf("get all jobs of server %d: %w", serverID, err)
+	}
+	return jobs, nil
+}
+
+func (r *repository) GetAll(ctx context.Context) ([]model.Job, error) {
+	var jobs []model.Job
+	if err := r.db.WithContext(ctx).Find(&jobs).Error; err != nil {
 		return nil, fmt.Errorf("get all jobs: %w", err)
 	}
 	return jobs, nil
