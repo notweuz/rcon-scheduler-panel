@@ -7,6 +7,7 @@ import (
 	"rcon-scheduler-panel/internal/config"
 	"rcon-scheduler-panel/internal/domain/auth"
 	"rcon-scheduler-panel/internal/domain/job"
+	"rcon-scheduler-panel/internal/domain/server"
 	"rcon-scheduler-panel/internal/domain/user"
 	"rcon-scheduler-panel/internal/middleware"
 	"rcon-scheduler-panel/internal/server/database"
@@ -40,7 +41,11 @@ func NewApp(cfg *config.Config) (App, error) {
 	}
 
 	validation.Register()
-	// s := NewScheduler(cfg)
+	s, err := NewScheduler(cfg)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to start scheduler!")
+		return nil, err
+	}
 
 	r := gin.New()
 	r.Use(middleware.Logger())
@@ -56,14 +61,18 @@ func NewApp(cfg *config.Config) (App, error) {
 
 	userRepo := user.NewRepository(db)
 	jobRepo := job.NewRepository(db)
+	serverRepo := server.NewRepository(db)
+
 	userSVC := user.NewService(userRepo)
 	authSVC := auth.NewService(userSVC, cfg)
 	jobSVC := job.NewService(jobRepo)
+	serverSVC := server.NewService(serverRepo, s)
 	
 	MakeRoutes(api, 
 		auth.NewHandler(authSVC), 
 		user.NewHandler(userSVC, cfg), 
 		job.NewHandler(jobSVC, cfg),
+		server.NewHandler(serverSVC, cfg),
 	)
 
 	srv := &http.Server{

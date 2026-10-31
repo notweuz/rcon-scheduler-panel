@@ -48,12 +48,12 @@ func (s *service) Create(ctx context.Context, srv *model.Server) error {
 			return fmt.Errorf("register server in scheduler: %w", err)
 		}
 	}
-	
+
 	return nil
 }
 
 func (s *service) GetByID(ctx context.Context, id int64) (*model.Server, error) {
-	srv, err := s.repo.GetByID(ctx, id)
+	srv, err := s.repo.GetByID(ctx, id, WithPreloadProtocol())
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
 			return nil, errs.ErrNotFound.WithMessage("server not found").WithErr(err)
@@ -64,7 +64,7 @@ func (s *service) GetByID(ctx context.Context, id int64) (*model.Server, error) 
 }
 
 func (s *service) GetAll(ctx context.Context) ([]model.Server, error) {
-	servers, err := s.repo.GetAll(ctx)
+	servers, err := s.repo.GetAll(ctx, WithPreloadProtocol())
 	if err != nil {
 		return nil, err
 	}
