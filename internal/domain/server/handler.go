@@ -47,9 +47,20 @@ func (h *Handler) GetByID(c *gin.Context) {
 	respond.OK(c, response.ServerShortFromModel(*server))
 }
 
+func (h *Handler) GetAll(c *gin.Context) {
+	servers, err := h.service.GetAll(c.Request.Context())
+	if err != nil {
+		respond.Error(c, err)
+		return
+	}
+	
+	respond.OK(c, servers)
+}
+
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	servers := r.Group("/servers", middleware.Auth(h.cfg))
 	{
 		servers.GET("/:id", h.GetByID)
+		servers.GET("", h.GetAll)
 	}
 }
