@@ -67,6 +67,11 @@ func NewApp(cfg *config.Config) (App, error) {
 	authSVC := auth.NewService(userSVC, cfg)
 	jobSVC := job.NewService(jobRepo)
 	serverSVC := server.NewService(serverRepo, s)
+
+	if err := ResumeScheduler(context.Background(), s, serverSVC, jobSVC); err != nil {
+		log.Error().Err(err).Msg("failed to resume scheduler")
+		return nil, err
+	}
 	
 	MakeRoutes(api, 
 		auth.NewHandler(authSVC), 
