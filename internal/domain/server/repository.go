@@ -7,6 +7,7 @@ import (
 	"rcon-scheduler-panel/internal/model"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type repository struct {
@@ -44,6 +45,24 @@ func (r *repository) GetAll(ctx context.Context, opts ...Option) ([]model.Server
 		return nil, fmt.Errorf("get all servers: %w", err)
 	}
 	return servers, nil
+}
+
+func (r *repository) Delete(ctx context.Context, id int64, opts ...Option) (*model.Server, error) {
+	var server model.Server
+
+	res := r.query(ctx, opts...).
+		Clauses(clause.Returning{Columns: []clause.Column{{Name: "address"}, {Name: "key"}}}).
+		Delete(&server, id)
+
+	if err := res.Error; err != nil {
+		return nil, fmt.Errorf("delete server %d: %w", id, err)
+	}
+
+	// At first, I though that repository shouldn't return an error, if no fields are affected. But it's kinda needed for http layer
+	if res.RowsAffected == 0 {
+		return nil, fmt.Errorf("delete server %d: %w", id, ErrNotFound)
+	}
+	return &server, nil
 }
 
 // DRY for opts

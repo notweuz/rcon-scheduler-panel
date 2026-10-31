@@ -15,6 +15,7 @@ type Repository interface {
 	Create(ctx context.Context, srv *model.Server) error
 	GetByID(ctx context.Context, id int64, opts ...Option) (*model.Server, error)
 	GetAll(ctx context.Context, opts ...Option) ([]model.Server, error)
+	Delete(ctx context.Context, id int64, opts ...Option) (*model.Server, error)
 }
 
 type service struct {
@@ -74,4 +75,23 @@ func (s *service) GetAll(ctx context.Context) ([]model.Server, error) {
 	}
 
 	return servers, nil
+}
+
+func (s *service) Delete(ctx context.Context, id int64) error {
+	srv, err := s.repo.Delete(ctx, id)
+	if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			return errs.ErrNotFound.WithMessage("server not found").WithErr(err)
+		}
+		return err
+	}
+	
+	if err := s.sch.Unregister(srv.ToCore().Key()); err != nil {
+		if errors.Is(err, scheduler.ErrServerNotFound) {
+			return errs.ErrNotFound.WithMessage("server not found").WithErr(err)
+		}
+		return fmt.Errorf("unregister server in scheduler: %w", err)
+	}
+	
+	return nil
 }

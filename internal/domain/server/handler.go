@@ -17,6 +17,7 @@ type Service interface {
 	Create(ctx context.Context, srv *model.Server) error
 	GetByID(ctx context.Context, id int64) (*model.Server, error)
 	GetAll(ctx context.Context) ([]model.Server, error)
+	Delete(ctx context.Context, id int64) error
 }
 
 type Handler struct {
@@ -57,10 +58,27 @@ func (h *Handler) GetAll(c *gin.Context) {
 	respond.OK(c, servers)
 }
 
+func (h *Handler) Delete(c *gin.Context) {
+	var serverID path.ServerID
+	if err := c.ShouldBindUri(&serverID); err != nil {
+		respond.Error(c, validation.FromBindError(err))
+		return
+	}
+
+	err := h.service.Delete(c.Request.Context(), serverID.ID)
+	if err != nil {
+		respond.Error(c, err)
+		return
+	}
+
+	respond.NoContent(c)
+}
+
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	servers := r.Group("/servers", middleware.Auth(h.cfg))
 	{
 		servers.GET("/:id", h.GetByID)
+		servers.DELETE("/:id", h.Delete)
 		servers.GET("", h.GetAll)
 	}
 }
