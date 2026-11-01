@@ -106,3 +106,51 @@ func TestServerHandler_GetById(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, w.Code)
 	})
 }
+
+func TestServerHandler_GetAll(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	testToken, err := auth.GenerateToken(1, "test")
+	require.NoError(t, err)
+
+	expectedServer := &model.Server{
+		ID:       1,
+		Name:     "Test Server",
+		Address:  "localhost",
+		Port:     25575,
+		Password: "test12345",
+		Protocol: &model.Protocol{
+			ID:   1,
+			Name: "RCON",
+		},
+	}
+
+	t.Run("200 - Servers Found", func(t *testing.T) {
+		mockSVC := mocks.NewMockService(t)
+
+		mockSVC.EXPECT().
+			GetAll(mock.Anything).
+			Return([]model.Server{*expectedServer}, nil)
+
+		r := setupRouter(mockSVC)
+
+		req, _ := http.NewRequest(http.MethodGet, "/api/servers", nil)
+		req.Header.Set("Authorization", "Bearer "+testToken)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("401 - Unauthorized (no token provided)", func(t *testing.T) {
+		mockSVC := mocks.NewMockService(t)
+
+		r := setupRouter(mockSVC)
+
+		req, _ := http.NewRequest(http.MethodGet, "/api/servers", nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+	})
+}
