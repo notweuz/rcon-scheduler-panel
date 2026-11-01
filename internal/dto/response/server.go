@@ -17,13 +17,23 @@ type ServerShort struct {
 }
 
 func ServerShortFromModel(s model.Server) ServerShort {
+	var desc string
+	if s.Description != nil {
+		desc = *s.Description
+	}
+
+	var protoName string
+	if s.Protocol != nil {
+		protoName = s.Protocol.Name
+	}
+
 	return ServerShort{
 		ID:          s.ID,
 		Name:        s.Name,
 		Address:     s.Address,
 		Port:        s.Port,
-		Protocol:    s.Protocol.Name,
-		Description: *s.Description,
+		Protocol:    protoName,
+		Description: desc,
 		CreatedAt:   s.CreatedAt,
 	}
 }
