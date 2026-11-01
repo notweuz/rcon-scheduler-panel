@@ -1,0 +1,18 @@
+dir: "{{.InterfaceDir}}/mocks"
+structname: "Mock{{.InterfaceName}}"
+pkgname: "mocks"
+filename: "mock_{{.InterfaceName | snakecase}}.go"
+
+packages:
+  rcon-scheduler-panel/internal/domain/auth:
+    config:
+      all: true
+  rcon-scheduler-panel/internal/domain/job:
+    config:
+      all: true
+  rcon-scheduler-panel/internal/domain/server:
+    config:
+      all: true
+  rcon-scheduler-panel/internal/domain/user:
+    config:
+      all: true
