@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
+	"github.com/notweuz/rcon-scheduler-core/scheduler"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
@@ -32,6 +33,7 @@ type app struct {
 	Gin    *gin.Engine
 	Config *config.Config
 	Srv    *http.Server
+	Sch    *scheduler.Scheduler
 }
 
 func NewApp(cfg *config.Config) (App, error) {
@@ -99,10 +101,14 @@ func NewApp(cfg *config.Config) (App, error) {
 		Config: cfg,
 		Gin:    r,
 		Srv:    srv,
+		Sch:    s,
 	}, nil
 }
 
 func (a *app) Start() {
+	a.Sch.Start()
+	log.Info().Msg("Scheduler started")
+
 	go func() {
 		log.Info().Msg("Starting application")
 		if err := a.Srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -118,7 +124,13 @@ func (a *app) Shutdown() {
 
 	if err := a.Srv.Shutdown(ctx); err != nil {
 		log.Error().Err(err).Msg("Error shutting down")
+	} else {
+		log.Info().Msg("Server gracefully stopped")
+	}
+
+	if err := a.Sch.Shutdown(); err != nil {
+		log.Error().Err(err).Msg("Error shutting down scheduler")
 		return
 	}
-	log.Info().Msg("Server gracefully stopped")
+	log.Info().Msg("Scheduler gracefully stopped")
 }
