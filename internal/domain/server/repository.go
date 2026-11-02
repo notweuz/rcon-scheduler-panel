@@ -51,7 +51,7 @@ func (r *repository) Delete(ctx context.Context, id int64, opts ...Option) (*mod
 	var server model.Server
 
 	res := r.query(ctx, opts...).
-		Clauses(clause.Returning{Columns: []clause.Column{{Name: "address"}, {Name: "key"}}}).
+		Clauses(clause.Returning{Columns: []clause.Column{{Name: "address"}, {Name: "port"}}}).
 		Delete(&server, id)
 
 	if err := res.Error; err != nil {
