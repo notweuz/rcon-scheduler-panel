@@ -6,11 +6,15 @@ import (
 	"fmt"
 	"rcon-scheduler-panel/internal/errs"
 	"rcon-scheduler-panel/internal/model"
+	"time"
 
 	"github.com/notweuz/rcon-scheduler-core/scheduler"
 	coreserver "github.com/notweuz/rcon-scheduler-core/server"
 	"github.com/rs/zerolog/log"
 )
+
+// fix core blocking server for ~20s if it's not available on command execution
+const executeTimeout = 5 * time.Second
 
 type Repository interface {
 	Create(ctx context.Context, srv *model.Server) error
@@ -155,6 +159,9 @@ func (s *service) Execute(ctx context.Context, id int64, command string) (string
 	if err != nil {
 		return "", fmt.Errorf("execute command for %d server: %w", id, err)
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, executeTimeout)
+	defer cancel()
 
 	response, err := s.sch.Execute(ctx, srv.ToCore().Key(), command)
 	if err != nil {
