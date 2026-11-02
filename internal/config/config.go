@@ -18,12 +18,13 @@ const (
 )
 
 type Config struct {
-	DatabaseDSN string `mapstructure:"DATABASE_DSN" validate:"required"`
-	JWTSecret   string `mapstructure:"JWT_SECRET" validate:"required"`
-	LogLevel    string `mapstructure:"LOG_LEVEL" validate:"oneof=trace debug info warn error fatal panic disabled"`
-	AppPort     int    `mapstructure:"APP_PORT" validate:"min=1,max=65535"`
-	Timezone    string `mapstructure:"TIMEZONE" validate:"required"`
-	GinMode     string `mapstructure:"GIN_MODE" validate:"oneof=debug release test"`
+	DatabaseDSN       string `mapstructure:"DATABASE_DSN" validate:"required"`
+	JWTSecret         string `mapstructure:"JWT_SECRET" validate:"required"`
+	LogLevel          string `mapstructure:"LOG_LEVEL" validate:"oneof=trace debug info warn error fatal panic disabled"`
+	AppPort           int    `mapstructure:"APP_PORT" validate:"min=1,max=65535"`
+	Timezone          string `mapstructure:"TIMEZONE" validate:"required"`
+	GinMode           string `mapstructure:"GIN_MODE" validate:"oneof=debug release test"`
+	AllowRegistration bool   `mapstructure:"ALLOW_REGISTRATION"`
 }
 
 func NewConfig(path string) (*Config, error) {
@@ -39,6 +40,7 @@ func NewConfig(path string) (*Config, error) {
 	v.SetDefault("DATABASE_DSN", "host=localhost user=postgres password=postgres dbname=rcon-scheduler-panel port=5432 sslmode=disable")
 	v.SetDefault("TIMEZONE", "Europe/Moscow")
 	v.SetDefault("GIN_MODE", "debug")
+	v.SetDefault("ALLOW_REGISTRATION", false)
 
 	err := v.ReadInConfig()
 	if err != nil {

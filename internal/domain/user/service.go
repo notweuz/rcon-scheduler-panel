@@ -11,6 +11,7 @@ type Repository interface {
 	GetByID(ctx context.Context, id int64) (*model.User, error)
 	GetByUsername(ctx context.Context, username string) (*model.User, error)
 	Create(ctx context.Context, user *model.User) error
+	Count(ctx context.Context) (int64, error)
 }
 
 type service struct {
@@ -51,4 +52,12 @@ func (s *service) GetByUsername(ctx context.Context, username string) (*model.Us
 		return nil, err
 	}
 	return u, nil
+}
+
+func (s *service) Count(ctx context.Context) (int64, error) {
+	amount, err := s.repo.Count(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return amount, nil
 }

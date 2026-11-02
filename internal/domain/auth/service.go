@@ -28,6 +28,16 @@ func NewService(userSVC user.Service, cfg *config.Config) Service {
 }
 
 func (s *service) Register(ctx context.Context, req request.AuthCredentials) (string, error) {
+	if !s.cfg.AllowRegistration {
+		count, err := s.userSVC.Count(ctx)
+		if err != nil {
+			return "", fmt.Errorf("register: count users: %w", err)
+		}
+		if count > 0 {
+			return "", errs.ErrForbidden.WithMessage("registration is disabled")
+		}
+	}
+
 	encryptedPassword, err := authUtil.GeneratePasswordHash(req.Password)
 	if err != nil {
 		return "", fmt.Errorf("register: hash password: %w", err)

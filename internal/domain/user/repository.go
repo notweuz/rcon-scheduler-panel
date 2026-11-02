@@ -48,3 +48,11 @@ func (r *repository) GetByUsername(ctx context.Context, username string) (*model
 	}
 	return &u, nil
 }
+
+func (r *repository) Count(ctx context.Context) (int64, error) {
+	var amount int64
+	if err := r.db.WithContext(ctx).Model(&model.User{}).Count(&amount).Error; err != nil {
+		return 0, fmt.Errorf("count users: %w", err)
+	}
+	return amount, nil
+}
