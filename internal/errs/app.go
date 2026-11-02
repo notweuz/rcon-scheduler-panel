@@ -60,4 +60,5 @@ var (
 	ErrBadRequest       = New(BadRequest, "BAD_REQUEST", "invalid request")
 	ErrMethodNotAllowed = New(MethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
 	ErrConflict         = New(Conflict, "CONFLICT", "resource conflict")
+	ErrBadGateway       = New(BadGateway, "BAD_GATEWAY", "game server is unavailable")
 )

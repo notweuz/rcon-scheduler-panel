@@ -10,4 +10,5 @@ const (
 	Forbidden
 	NotFound
 	Conflict
+	BadGateway
 )

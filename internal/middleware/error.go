@@ -18,6 +18,7 @@ var statusByKind = map[errs.Kind]int{
 	errs.MethodNotAllowed: http.StatusMethodNotAllowed,
 	errs.Conflict:         http.StatusConflict,
 	errs.Internal:         http.StatusInternalServerError,
+	errs.BadGateway:       http.StatusBadGateway,
 }
 
 func httpStatus(k errs.Kind) int {
@@ -50,7 +51,9 @@ func ErrorHandler() gin.HandlerFunc {
 				Str("method", c.Request.Method).
 				Str("path", c.Request.URL.Path).
 				Msg("request failed")
+		}
 
+		if status == http.StatusInternalServerError {
 			code = errs.ErrInternalServer.Code
 			message = errs.ErrInternalServer.Message
 			fields = nil
