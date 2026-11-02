@@ -410,6 +410,114 @@ func (_c *MockService_Resume_Call) RunAndReturn(run func(ctx context.Context) er
 	return _c
 }
 
+// ScheduleServer provides a mock function for the type MockService
+func (_mock *MockService) ScheduleServer(ctx context.Context, serverID int64) error {
+	ret := _mock.Called(ctx, serverID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ScheduleServer")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+		r0 = returnFunc(ctx, serverID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockService_ScheduleServer_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ScheduleServer'
+type MockService_ScheduleServer_Call struct {
+	*mock.Call
+}
+
+// ScheduleServer is a helper method to define mock.On call
+//   - ctx context.Context
+//   - serverID int64
+func (_e *MockService_Expecter) ScheduleServer(ctx any, serverID any) *MockService_ScheduleServer_Call {
+	return &MockService_ScheduleServer_Call{Call: _e.mock.On("ScheduleServer", ctx, serverID)}
+}
+
+func (_c *MockService_ScheduleServer_Call) Run(run func(ctx context.Context, serverID int64)) *MockService_ScheduleServer_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockService_ScheduleServer_Call) Return(err error) *MockService_ScheduleServer_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockService_ScheduleServer_Call) RunAndReturn(run func(ctx context.Context, serverID int64) error) *MockService_ScheduleServer_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UnscheduleServer provides a mock function for the type MockService
+func (_mock *MockService) UnscheduleServer(serverID int64) error {
+	ret := _mock.Called(serverID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UnscheduleServer")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(int64) error); ok {
+		r0 = returnFunc(serverID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockService_UnscheduleServer_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UnscheduleServer'
+type MockService_UnscheduleServer_Call struct {
+	*mock.Call
+}
+
+// UnscheduleServer is a helper method to define mock.On call
+//   - serverID int64
+func (_e *MockService_Expecter) UnscheduleServer(serverID any) *MockService_UnscheduleServer_Call {
+	return &MockService_UnscheduleServer_Call{Call: _e.mock.On("UnscheduleServer", serverID)}
+}
+
+func (_c *MockService_UnscheduleServer_Call) Run(run func(serverID int64)) *MockService_UnscheduleServer_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockService_UnscheduleServer_Call) Return(err error) *MockService_UnscheduleServer_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockService_UnscheduleServer_Call) RunAndReturn(run func(serverID int64) error) *MockService_UnscheduleServer_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Update provides a mock function for the type MockService
 func (_mock *MockService) Update(ctx context.Context, job *model.Job) error {
 	ret := _mock.Called(ctx, job)

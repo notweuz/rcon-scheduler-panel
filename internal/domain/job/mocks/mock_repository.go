@@ -323,8 +323,14 @@ func (_c *MockRepository_GetByID_Call) RunAndReturn(run func(ctx context.Context
 }
 
 // GetByServerID provides a mock function for the type MockRepository
-func (_mock *MockRepository) GetByServerID(ctx context.Context, serverID int64) ([]model.Job, error) {
-	ret := _mock.Called(ctx, serverID)
+func (_mock *MockRepository) GetByServerID(ctx context.Context, serverID int64, opts ...job.Option) ([]model.Job, error) {
+	var tmpRet mock.Arguments
+	if len(opts) > 0 {
+		tmpRet = _mock.Called(ctx, serverID, opts)
+	} else {
+		tmpRet = _mock.Called(ctx, serverID)
+	}
+	ret := tmpRet
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetByServerID")
@@ -332,18 +338,18 @@ func (_mock *MockRepository) GetByServerID(ctx context.Context, serverID int64) 
 
 	var r0 []model.Job
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) ([]model.Job, error)); ok {
-		return returnFunc(ctx, serverID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, ...job.Option) ([]model.Job, error)); ok {
+		return returnFunc(ctx, serverID, opts...)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) []model.Job); ok {
-		r0 = returnFunc(ctx, serverID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, ...job.Option) []model.Job); ok {
+		r0 = returnFunc(ctx, serverID, opts...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]model.Job)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
-		r1 = returnFunc(ctx, serverID)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, ...job.Option) error); ok {
+		r1 = returnFunc(ctx, serverID, opts...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -358,11 +364,13 @@ type MockRepository_GetByServerID_Call struct {
 // GetByServerID is a helper method to define mock.On call
 //   - ctx context.Context
 //   - serverID int64
-func (_e *MockRepository_Expecter) GetByServerID(ctx any, serverID any) *MockRepository_GetByServerID_Call {
-	return &MockRepository_GetByServerID_Call{Call: _e.mock.On("GetByServerID", ctx, serverID)}
+//   - opts ...job.Option
+func (_e *MockRepository_Expecter) GetByServerID(ctx any, serverID any, opts ...any) *MockRepository_GetByServerID_Call {
+	return &MockRepository_GetByServerID_Call{Call: _e.mock.On("GetByServerID",
+		append([]any{ctx, serverID}, opts...)...)}
 }
 
-func (_c *MockRepository_GetByServerID_Call) Run(run func(ctx context.Context, serverID int64)) *MockRepository_GetByServerID_Call {
+func (_c *MockRepository_GetByServerID_Call) Run(run func(ctx context.Context, serverID int64, opts ...job.Option)) *MockRepository_GetByServerID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -372,9 +380,16 @@ func (_c *MockRepository_GetByServerID_Call) Run(run func(ctx context.Context, s
 		if args[1] != nil {
 			arg1 = args[1].(int64)
 		}
+		var arg2 []job.Option
+		var variadicArgs []job.Option
+		if len(args) > 2 {
+			variadicArgs = args[2].([]job.Option)
+		}
+		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
+			arg2...,
 		)
 	})
 	return _c
@@ -385,7 +400,7 @@ func (_c *MockRepository_GetByServerID_Call) Return(jobs []model.Job, err error)
 	return _c
 }
 
-func (_c *MockRepository_GetByServerID_Call) RunAndReturn(run func(ctx context.Context, serverID int64) ([]model.Job, error)) *MockRepository_GetByServerID_Call {
+func (_c *MockRepository_GetByServerID_Call) RunAndReturn(run func(ctx context.Context, serverID int64, opts ...job.Option) ([]model.Job, error)) *MockRepository_GetByServerID_Call {
 	_c.Call.Return(run)
 	return _c
 }
