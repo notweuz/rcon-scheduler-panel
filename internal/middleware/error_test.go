@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestErrorHandlerStatus(t *testing.T) {
@@ -37,9 +39,7 @@ func TestErrorHandlerStatus(t *testing.T) {
 			w := httptest.NewRecorder()
 			r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/", nil))
 
-			if w.Code != tt.want {
-				t.Errorf("got status %d, want %d", w.Code, tt.want)
-			}
+			assert.Equal(t, tt.want, w.Code)
 		})
 	}
 }
@@ -71,12 +71,8 @@ func TestErrorHandlerMessage(t *testing.T) {
 					Message string `json:"message"`
 				} `json:"error"`
 			}
-			if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
-				t.Fatalf("decode response: %v", err)
-			}
-			if resp.Error.Message != tt.want {
-				t.Errorf("got message %q, want %q", resp.Error.Message, tt.want)
-			}
+			require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+			assert.Equal(t, tt.want, resp.Error.Message)
 		})
 	}
 }
