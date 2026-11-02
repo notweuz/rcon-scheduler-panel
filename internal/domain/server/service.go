@@ -17,15 +17,22 @@ type Repository interface {
 	GetByID(ctx context.Context, id int64, opts ...Option) (*model.Server, error)
 	GetAll(ctx context.Context, opts ...Option) ([]model.Server, error)
 	Delete(ctx context.Context, id int64, opts ...Option) (*model.Server, error)
+	Update(ctx context.Context, srv *model.Server) error
+}
+
+type JobScheduler interface {
+	ScheduleServer(ctx context.Context, serverID int64) error
+	UnscheduleServer(serverID int64) error
 }
 
 type service struct {
 	repo Repository
 	sch  *scheduler.Scheduler
+	jobs JobScheduler
 }
 
-func NewService(repo Repository, sch *scheduler.Scheduler) Service {
-	return &service{repo: repo, sch: sch}
+func NewService(repo Repository, sch *scheduler.Scheduler, jobs JobScheduler) Service {
+	return &service{repo: repo, sch: sch, jobs: jobs}
 }
 
 func (s *service) Create(ctx context.Context, srv *model.Server) error {
@@ -42,19 +49,7 @@ func (s *service) Create(ctx context.Context, srv *model.Server) error {
 	}
 	srv.Protocol = created.Protocol
 
-	if err := s.sch.Register(srv.ToCore()); err != nil {
-		switch {
-		case errors.Is(err, scheduler.ErrServerExists):
-			err = errs.ErrConflict.
-				WithMessage("server already registered").
-				WithErr(err)
-		case errors.Is(err, coreserver.ErrEmptyAddress),
-			errors.Is(err, coreserver.ErrInvalidPort),
-			errors.Is(err, scheduler.ErrUnsupportedType):
-			err = errs.ErrBadRequest.WithMessage(err.Error()).WithErr(err)
-		default:
-			err = fmt.Errorf("register server in scheduler: %w", err)
-		}
+	if err := s.register(srv); err != nil {
 		return s.rollbackCreate(ctx, srv.ID, err)
 	}
 
@@ -101,6 +96,10 @@ func (s *service) Delete(ctx context.Context, id int64) error {
 		return err
 	}
 
+	if err := s.jobs.UnscheduleServer(id); err != nil {
+		return fmt.Errorf("unschedule jobs of server %d: %w", id, err)
+	}
+
 	if err := s.sch.Unregister(srv.ToCore().Key()); err != nil {
 		if errors.Is(err, scheduler.ErrServerNotFound) {
 			log.Warn().Err(err).Int64("server_id", id).Msg("deleted server wasn't registered in scheduler")
@@ -109,5 +108,83 @@ func (s *service) Delete(ctx context.Context, id int64) error {
 		return fmt.Errorf("unregister server in scheduler: %w", err)
 	}
 
+	return nil
+}
+
+func (s *service) Update(ctx context.Context, srv *model.Server) error {
+	old, err := s.repo.GetByID(ctx, srv.ID, WithPreloadProtocol())
+	if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			return errs.ErrNotFound.WithMessage("server not found").WithErr(err)
+		}
+		return err
+	}
+
+	if srv.Password == "" {
+		srv.Password = old.Password
+	}
+
+	if err := s.repo.Update(ctx, srv); err != nil {
+		switch {
+		case errors.Is(err, ErrNotFound):
+			return errs.ErrNotFound.WithMessage("server not found").WithErr(err)
+		case errors.Is(err, ErrProtocolNotFound):
+			return errs.ErrNotFound.WithMessage("protocol not found").WithErr(err)
+		}
+		return err
+	}
+
+	updated, err := s.repo.GetByID(ctx, srv.ID, WithPreloadProtocol())
+	if err != nil {
+		return s.rollbackUpdate(ctx, old, fmt.Errorf("load updated server: %w", err))
+	}
+
+	if err := s.jobs.UnscheduleServer(old.ID); err != nil {
+		return fmt.Errorf("unschedule jobs of server %d: %w", old.ID, err)
+	}
+	if err := s.sch.Unregister(old.ToCore().Key()); err != nil && !errors.Is(err, scheduler.ErrServerNotFound) {
+		return fmt.Errorf("unregister server in scheduler: %w", err)
+	}
+
+	if err := s.register(updated); err != nil {
+		return s.rollbackUpdate(ctx, old, err)
+	}
+	if err := s.jobs.ScheduleServer(ctx, updated.ID); err != nil {
+		return fmt.Errorf("schedule jobs of server %d: %w", updated.ID, err)
+	}
+
+	*srv = *updated
+	return nil
+}
+
+func (s *service) rollbackUpdate(ctx context.Context, old *model.Server, cause error) error {
+	failed := []error{cause}
+	if err := s.repo.Update(ctx, old); err != nil {
+		failed = append(failed, fmt.Errorf("rollback server %d: %w", old.ID, err))
+	}
+	if err := s.sch.Register(old.ToCore()); err != nil && !errors.Is(err, scheduler.ErrServerExists) {
+		failed = append(failed, fmt.Errorf("register old server %d: %w", old.ID, err))
+	}
+	if err := s.jobs.ScheduleServer(ctx, old.ID); err != nil {
+		failed = append(failed, fmt.Errorf("schedule jobs of old server %d: %w", old.ID, err))
+	}
+	return errors.Join(failed...)
+}
+
+func (s *service) register(srv *model.Server) error {
+	if err := s.sch.Register(srv.ToCore()); err != nil {
+		switch {
+		case errors.Is(err, scheduler.ErrServerExists):
+			return errs.ErrConflict.
+				WithMessage("server already registered").
+				WithErr(err)
+		case errors.Is(err, coreserver.ErrEmptyAddress),
+			errors.Is(err, coreserver.ErrInvalidPort),
+			errors.Is(err, scheduler.ErrUnsupportedType):
+			return errs.ErrBadRequest.WithMessage(err.Error()).WithErr(err)
+		default:
+			return fmt.Errorf("register server in scheduler: %w", err)
+		}
+	}
 	return nil
 }
