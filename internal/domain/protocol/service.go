@@ -8,10 +8,8 @@ import (
 )
 
 type Repository interface {
-	Create(ctx context.Context, protocol *model.Protocol) error
 	GetByID(ctx context.Context, id int64) (*model.Protocol, error)
 	GetAll(ctx context.Context) ([]model.Protocol, error)
-	Delete(ctx context.Context, id int64) error
 }
 
 type service struct {
@@ -20,16 +18,6 @@ type service struct {
 
 func NewService(repo Repository) Service {
 	return &service{repo: repo}
-}
-
-func (s *service) Create(ctx context.Context, protocol *model.Protocol) error {
-	if err := s.repo.Create(ctx, protocol); err != nil {
-		if errors.Is(err, ErrAlreadyExists) {
-			return errs.ErrConflict.WithMessage("protocol already exist").WithErr(err)
-		}
-		return err
-	}
-	return nil
 }
 
 func (s *service) GetByID(ctx context.Context, id int64) (*model.Protocol, error) {
@@ -54,14 +42,4 @@ func (s *service) GetAll(ctx context.Context) ([]model.Protocol, error) {
 	}
 
 	return protocols, nil
-}
-
-func (s *service) Delete(ctx context.Context, id int64) error {
-	if err := s.repo.Delete(ctx, id); err != nil {
-		if errors.Is(err, ErrNotFound) {
-			return errs.ErrNotFound.WithMessage("protocol not found").WithErr(err)
-		}
-		return err
-	}
-	return nil
 }
