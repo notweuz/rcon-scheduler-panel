@@ -71,7 +71,7 @@ func NewApp(cfg *config.Config) (App, error) {
 	userSVC := user.NewService(userRepo)
 	authSVC := auth.NewService(userSVC, cfg)
 	jobSVC := job.NewService(jobRepo, s)
-	serverSVC := server.NewService(serverRepo, s)
+	serverSVC := server.NewService(serverRepo, s, jobSVC)
 	protocolSVC := protocol.NewService(protocolRepo)
 
 	if err := ResumeScheduler(context.Background(), s, serverSVC, jobSVC); err != nil {

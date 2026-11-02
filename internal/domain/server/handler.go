@@ -19,6 +19,7 @@ type Service interface {
 	GetByID(ctx context.Context, id int64) (*model.Server, error)
 	GetAll(ctx context.Context) ([]model.Server, error)
 	Delete(ctx context.Context, id int64) error
+	Update(ctx context.Context, srv *model.Server) error
 }
 
 type Handler struct {
@@ -86,6 +87,36 @@ func (h *Handler) GetAll(c *gin.Context) {
 	respond.OK(c, serverDTOs)
 }
 
+func (h *Handler) Update(c *gin.Context) {
+	var serverID path.ServerID
+	if err := c.ShouldBindUri(&serverID); err != nil {
+		respond.Error(c, validation.FromBindError(err))
+		return
+	}
+
+	var serverReq request.UpdateServer
+	if err := c.ShouldBindJSON(&serverReq); err != nil {
+		respond.Error(c, validation.FromBindError(err))
+		return
+	}
+
+	srv := &model.Server{
+		ID:         serverID.ID,
+		Name:       serverReq.Name,
+		Address:    serverReq.Address,
+		Port:       serverReq.Port,
+		Password:   serverReq.Password,
+		ProtocolID: serverReq.ProtocolID,
+	}
+
+	if err := h.service.Update(c.Request.Context(), srv); err != nil {
+		respond.Error(c, err)
+		return
+	}
+
+	respond.OK(c, response.ServerShortFromModel(*srv))
+}
+
 func (h *Handler) Delete(c *gin.Context) {
 	var serverID path.ServerID
 	if err := c.ShouldBindUri(&serverID); err != nil {
@@ -106,6 +137,7 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	servers := r.Group("/servers", middleware.Auth(h.cfg))
 	{
 		servers.GET("/:id", h.GetByID)
+		servers.PUT("/:id", h.Update)
 		servers.DELETE("/:id", h.Delete)
 		servers.GET("", h.GetAll)
 		servers.POST("", h.Create)
