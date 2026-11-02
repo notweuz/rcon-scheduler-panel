@@ -6,6 +6,7 @@ package mocks
 
 import (
 	"context"
+	"rcon-scheduler-panel/internal/domain/job"
 	"rcon-scheduler-panel/internal/model"
 
 	mock "github.com/stretchr/testify/mock"
@@ -104,109 +105,36 @@ func (_c *MockRepository_Create_Call) RunAndReturn(run func(ctx context.Context,
 	return _c
 }
 
-// GetAll provides a mock function for the type MockRepository
-func (_mock *MockRepository) GetAll(ctx context.Context) ([]model.Job, error) {
-	ret := _mock.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetAll")
-	}
-
-	var r0 []model.Job
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]model.Job, error)); ok {
-		return returnFunc(ctx)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) []model.Job); ok {
-		r0 = returnFunc(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]model.Job)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = returnFunc(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockRepository_GetAll_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAll'
-type MockRepository_GetAll_Call struct {
-	*mock.Call
-}
-
-// GetAll is a helper method to define mock.On call
-//   - ctx context.Context
-func (_e *MockRepository_Expecter) GetAll(ctx any) *MockRepository_GetAll_Call {
-	return &MockRepository_GetAll_Call{Call: _e.mock.On("GetAll", ctx)}
-}
-
-func (_c *MockRepository_GetAll_Call) Run(run func(ctx context.Context)) *MockRepository_GetAll_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockRepository_GetAll_Call) Return(jobs []model.Job, err error) *MockRepository_GetAll_Call {
-	_c.Call.Return(jobs, err)
-	return _c
-}
-
-func (_c *MockRepository_GetAll_Call) RunAndReturn(run func(ctx context.Context) ([]model.Job, error)) *MockRepository_GetAll_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetByID provides a mock function for the type MockRepository
-func (_mock *MockRepository) GetByID(ctx context.Context, id int64) (*model.Job, error) {
+// Delete provides a mock function for the type MockRepository
+func (_mock *MockRepository) Delete(ctx context.Context, id int64) error {
 	ret := _mock.Called(ctx, id)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetByID")
+		panic("no return value specified for Delete")
 	}
 
-	var r0 *model.Job
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) (*model.Job, error)); ok {
-		return returnFunc(ctx, id)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) *model.Job); ok {
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) error); ok {
 		r0 = returnFunc(ctx, id)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Job)
-		}
+		r0 = ret.Error(0)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
-		r1 = returnFunc(ctx, id)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
+	return r0
 }
 
-// MockRepository_GetByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByID'
-type MockRepository_GetByID_Call struct {
+// MockRepository_Delete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Delete'
+type MockRepository_Delete_Call struct {
 	*mock.Call
 }
 
-// GetByID is a helper method to define mock.On call
+// Delete is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id int64
-func (_e *MockRepository_Expecter) GetByID(ctx any, id any) *MockRepository_GetByID_Call {
-	return &MockRepository_GetByID_Call{Call: _e.mock.On("GetByID", ctx, id)}
+func (_e *MockRepository_Expecter) Delete(ctx any, id any) *MockRepository_Delete_Call {
+	return &MockRepository_Delete_Call{Call: _e.mock.On("Delete", ctx, id)}
 }
 
-func (_c *MockRepository_GetByID_Call) Run(run func(ctx context.Context, id int64)) *MockRepository_GetByID_Call {
+func (_c *MockRepository_Delete_Call) Run(run func(ctx context.Context, id int64)) *MockRepository_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -224,12 +152,172 @@ func (_c *MockRepository_GetByID_Call) Run(run func(ctx context.Context, id int6
 	return _c
 }
 
-func (_c *MockRepository_GetByID_Call) Return(job *model.Job, err error) *MockRepository_GetByID_Call {
-	_c.Call.Return(job, err)
+func (_c *MockRepository_Delete_Call) Return(err error) *MockRepository_Delete_Call {
+	_c.Call.Return(err)
 	return _c
 }
 
-func (_c *MockRepository_GetByID_Call) RunAndReturn(run func(ctx context.Context, id int64) (*model.Job, error)) *MockRepository_GetByID_Call {
+func (_c *MockRepository_Delete_Call) RunAndReturn(run func(ctx context.Context, id int64) error) *MockRepository_Delete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetAll provides a mock function for the type MockRepository
+func (_mock *MockRepository) GetAll(ctx context.Context, opts ...job.Option) ([]model.Job, error) {
+	var tmpRet mock.Arguments
+	if len(opts) > 0 {
+		tmpRet = _mock.Called(ctx, opts)
+	} else {
+		tmpRet = _mock.Called(ctx)
+	}
+	ret := tmpRet
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAll")
+	}
+
+	var r0 []model.Job
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, ...job.Option) ([]model.Job, error)); ok {
+		return returnFunc(ctx, opts...)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, ...job.Option) []model.Job); ok {
+		r0 = returnFunc(ctx, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.Job)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, ...job.Option) error); ok {
+		r1 = returnFunc(ctx, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockRepository_GetAll_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAll'
+type MockRepository_GetAll_Call struct {
+	*mock.Call
+}
+
+// GetAll is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts ...job.Option
+func (_e *MockRepository_Expecter) GetAll(ctx any, opts ...any) *MockRepository_GetAll_Call {
+	return &MockRepository_GetAll_Call{Call: _e.mock.On("GetAll",
+		append([]any{ctx}, opts...)...)}
+}
+
+func (_c *MockRepository_GetAll_Call) Run(run func(ctx context.Context, opts ...job.Option)) *MockRepository_GetAll_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []job.Option
+		var variadicArgs []job.Option
+		if len(args) > 1 {
+			variadicArgs = args[1].([]job.Option)
+		}
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_GetAll_Call) Return(jobs []model.Job, err error) *MockRepository_GetAll_Call {
+	_c.Call.Return(jobs, err)
+	return _c
+}
+
+func (_c *MockRepository_GetAll_Call) RunAndReturn(run func(ctx context.Context, opts ...job.Option) ([]model.Job, error)) *MockRepository_GetAll_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetByID provides a mock function for the type MockRepository
+func (_mock *MockRepository) GetByID(ctx context.Context, id int64, opts ...job.Option) (*model.Job, error) {
+	var tmpRet mock.Arguments
+	if len(opts) > 0 {
+		tmpRet = _mock.Called(ctx, id, opts)
+	} else {
+		tmpRet = _mock.Called(ctx, id)
+	}
+	ret := tmpRet
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByID")
+	}
+
+	var r0 *model.Job
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, ...job.Option) (*model.Job, error)); ok {
+		return returnFunc(ctx, id, opts...)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, ...job.Option) *model.Job); ok {
+		r0 = returnFunc(ctx, id, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Job)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, ...job.Option) error); ok {
+		r1 = returnFunc(ctx, id, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockRepository_GetByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByID'
+type MockRepository_GetByID_Call struct {
+	*mock.Call
+}
+
+// GetByID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id int64
+//   - opts ...job.Option
+func (_e *MockRepository_Expecter) GetByID(ctx any, id any, opts ...any) *MockRepository_GetByID_Call {
+	return &MockRepository_GetByID_Call{Call: _e.mock.On("GetByID",
+		append([]any{ctx, id}, opts...)...)}
+}
+
+func (_c *MockRepository_GetByID_Call) Run(run func(ctx context.Context, id int64, opts ...job.Option)) *MockRepository_GetByID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 []job.Option
+		var variadicArgs []job.Option
+		if len(args) > 2 {
+			variadicArgs = args[2].([]job.Option)
+		}
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_GetByID_Call) Return(job1 *model.Job, err error) *MockRepository_GetByID_Call {
+	_c.Call.Return(job1, err)
+	return _c
+}
+
+func (_c *MockRepository_GetByID_Call) RunAndReturn(run func(ctx context.Context, id int64, opts ...job.Option) (*model.Job, error)) *MockRepository_GetByID_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -298,6 +386,63 @@ func (_c *MockRepository_GetByServerID_Call) Return(jobs []model.Job, err error)
 }
 
 func (_c *MockRepository_GetByServerID_Call) RunAndReturn(run func(ctx context.Context, serverID int64) ([]model.Job, error)) *MockRepository_GetByServerID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Update provides a mock function for the type MockRepository
+func (_mock *MockRepository) Update(ctx context.Context, job1 *model.Job) error {
+	ret := _mock.Called(ctx, job1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Update")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Job) error); ok {
+		r0 = returnFunc(ctx, job1)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockRepository_Update_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Update'
+type MockRepository_Update_Call struct {
+	*mock.Call
+}
+
+// Update is a helper method to define mock.On call
+//   - ctx context.Context
+//   - job1 *model.Job
+func (_e *MockRepository_Expecter) Update(ctx any, job1 any) *MockRepository_Update_Call {
+	return &MockRepository_Update_Call{Call: _e.mock.On("Update", ctx, job1)}
+}
+
+func (_c *MockRepository_Update_Call) Run(run func(ctx context.Context, job1 *model.Job)) *MockRepository_Update_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *model.Job
+		if args[1] != nil {
+			arg1 = args[1].(*model.Job)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_Update_Call) Return(err error) *MockRepository_Update_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockRepository_Update_Call) RunAndReturn(run func(ctx context.Context, job1 *model.Job) error) *MockRepository_Update_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -5,5 +5,5 @@ type JobID struct {
 }
 
 type JobServerID struct {
-	ServerID int64 `binding:"required" uri:"server_id"`
+	ServerID int64 `binding:"required" uri:"id"`
 }

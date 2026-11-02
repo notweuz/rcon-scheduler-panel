@@ -7,6 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-playground/validator/v10 v10.30.5
 	github.com/golang-jwt/jwt/v5 v5.3.1
+	github.com/google/uuid v1.6.0
 	github.com/notweuz/rcon-scheduler-core v0.5.0
 	github.com/pressly/goose/v3 v3.29.0
 	github.com/rs/zerolog v1.35.1
@@ -31,7 +32,6 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/goccy/go-json v0.11.2 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorcon/rcon v1.4.0 // indirect
 	github.com/gorcon/telnet v1.2.3 // indirect
 	github.com/gorcon/websocket v1.1.3 // indirect

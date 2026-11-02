@@ -104,6 +104,63 @@ func (_c *MockService_Create_Call) RunAndReturn(run func(ctx context.Context, jo
 	return _c
 }
 
+// Delete provides a mock function for the type MockService
+func (_mock *MockService) Delete(ctx context.Context, id int64) error {
+	ret := _mock.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Delete")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+		r0 = returnFunc(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockService_Delete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Delete'
+type MockService_Delete_Call struct {
+	*mock.Call
+}
+
+// Delete is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id int64
+func (_e *MockService_Expecter) Delete(ctx any, id any) *MockService_Delete_Call {
+	return &MockService_Delete_Call{Call: _e.mock.On("Delete", ctx, id)}
+}
+
+func (_c *MockService_Delete_Call) Run(run func(ctx context.Context, id int64)) *MockService_Delete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockService_Delete_Call) Return(err error) *MockService_Delete_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockService_Delete_Call) RunAndReturn(run func(ctx context.Context, id int64) error) *MockService_Delete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetAll provides a mock function for the type MockService
 func (_mock *MockService) GetAll(ctx context.Context) ([]model.Job, error) {
 	ret := _mock.Called(ctx)
@@ -298,6 +355,114 @@ func (_c *MockService_GetByServerID_Call) Return(jobs []model.Job, err error) *M
 }
 
 func (_c *MockService_GetByServerID_Call) RunAndReturn(run func(ctx context.Context, serverID int64) ([]model.Job, error)) *MockService_GetByServerID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Resume provides a mock function for the type MockService
+func (_mock *MockService) Resume(ctx context.Context) error {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Resume")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context) error); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockService_Resume_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Resume'
+type MockService_Resume_Call struct {
+	*mock.Call
+}
+
+// Resume is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockService_Expecter) Resume(ctx any) *MockService_Resume_Call {
+	return &MockService_Resume_Call{Call: _e.mock.On("Resume", ctx)}
+}
+
+func (_c *MockService_Resume_Call) Run(run func(ctx context.Context)) *MockService_Resume_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockService_Resume_Call) Return(err error) *MockService_Resume_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockService_Resume_Call) RunAndReturn(run func(ctx context.Context) error) *MockService_Resume_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Update provides a mock function for the type MockService
+func (_mock *MockService) Update(ctx context.Context, job *model.Job) error {
+	ret := _mock.Called(ctx, job)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Update")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Job) error); ok {
+		r0 = returnFunc(ctx, job)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockService_Update_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Update'
+type MockService_Update_Call struct {
+	*mock.Call
+}
+
+// Update is a helper method to define mock.On call
+//   - ctx context.Context
+//   - job *model.Job
+func (_e *MockService_Expecter) Update(ctx any, job any) *MockService_Update_Call {
+	return &MockService_Update_Call{Call: _e.mock.On("Update", ctx, job)}
+}
+
+func (_c *MockService_Update_Call) Run(run func(ctx context.Context, job *model.Job)) *MockService_Update_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *model.Job
+		if args[1] != nil {
+			arg1 = args[1].(*model.Job)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockService_Update_Call) Return(err error) *MockService_Update_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockService_Update_Call) RunAndReturn(run func(ctx context.Context, job *model.Job) error) *MockService_Update_Call {
 	_c.Call.Return(run)
 	return _c
 }
