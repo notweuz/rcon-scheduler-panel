@@ -12,7 +12,8 @@ type Config struct {
 	JWTSecret   string `mapstructure:"JWT_SECRET"`
 	LogLevel    string `mapstructure:"LOG_LEVEL"`
 	AppPort     int    `mapstructure:"APP_PORT"`
-	Timezone	string `mapstructure:"TIMEZONE"`
+	Timezone    string `mapstructure:"TIMEZONE"`
+	GinMode     string `mapstructure:"GIN_MODE"`
 }
 
 func NewConfig(path string) (*Config, error) {
@@ -27,6 +28,7 @@ func NewConfig(path string) (*Config, error) {
 	v.SetDefault("JWT_SECRET", "secret")
 	v.SetDefault("DATABASE_DSN", "host=localhost user=postgres password=postgres dbname=rcon-scheduler-panel port=5432 sslmode=disable")
 	v.SetDefault("TIMEZONE", "Europe/Moscow")
+	v.SetDefault("GIN_MODE", "debug")
 
 	err := v.ReadInConfig()
 	if err != nil {

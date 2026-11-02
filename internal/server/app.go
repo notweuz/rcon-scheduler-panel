@@ -48,6 +48,7 @@ func NewApp(cfg *config.Config) (App, error) {
 		return nil, err
 	}
 
+	gin.SetMode(cfg.GinMode)
 	r := gin.New()
 	r.Use(middleware.Logger())
 	r.Use(middleware.ErrorHandler())
