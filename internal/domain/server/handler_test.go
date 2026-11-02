@@ -147,6 +147,16 @@ func TestServerHandler_GetAll(t *testing.T) {
 		r.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
+
+		var resp struct {
+			Success bool                   `json:"success"`
+			Data    []response.ServerShort `json:"data"`
+		}
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+		require.Len(t, resp.Data, 1)
+		assert.Equal(t, expectedServer.ID, resp.Data[0].ID)
+		assert.Equal(t, expectedServer.Protocol.Name, resp.Data[0].Protocol)
+		assert.NotContains(t, w.Body.String(), expectedServer.Password)
 	})
 
 	t.Run("401 - Unauthorized (no token provided)", func(t *testing.T) {

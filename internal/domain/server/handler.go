@@ -78,8 +78,12 @@ func (h *Handler) GetAll(c *gin.Context) {
 		respond.Error(c, err)
 		return
 	}
-	
-	respond.OK(c, servers)
+
+	serverDTOs := make([]response.ServerShort, len(servers))
+	for i, srv := range servers {
+		serverDTOs[i] = response.ServerShortFromModel(srv)
+	}
+	respond.OK(c, serverDTOs)
 }
 
 func (h *Handler) Delete(c *gin.Context) {
