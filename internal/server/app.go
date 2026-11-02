@@ -7,6 +7,7 @@ import (
 	"rcon-scheduler-panel/internal/config"
 	"rcon-scheduler-panel/internal/domain/auth"
 	"rcon-scheduler-panel/internal/domain/job"
+	"rcon-scheduler-panel/internal/domain/protocol"
 	"rcon-scheduler-panel/internal/domain/server"
 	"rcon-scheduler-panel/internal/domain/user"
 	"rcon-scheduler-panel/internal/middleware"
@@ -62,11 +63,13 @@ func NewApp(cfg *config.Config) (App, error) {
 	userRepo := user.NewRepository(db)
 	jobRepo := job.NewRepository(db)
 	serverRepo := server.NewRepository(db)
+	protocolRepo := protocol.NewRepository(db)
 
 	userSVC := user.NewService(userRepo)
 	authSVC := auth.NewService(userSVC, cfg)
 	jobSVC := job.NewService(jobRepo)
 	serverSVC := server.NewService(serverRepo, s)
+	protocolSVC := protocol.NewService(protocolRepo)
 
 	if err := ResumeScheduler(context.Background(), s, serverSVC, jobSVC); err != nil {
 		log.Error().Err(err).Msg("failed to resume scheduler")
@@ -78,6 +81,7 @@ func NewApp(cfg *config.Config) (App, error) {
 		user.NewHandler(userSVC, cfg), 
 		job.NewHandler(jobSVC, cfg),
 		server.NewHandler(serverSVC, cfg),
+		protocol.NewHandler(protocolSVC, cfg),
 	)
 
 	srv := &http.Server{
