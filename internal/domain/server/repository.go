@@ -65,6 +65,24 @@ func (r *repository) Delete(ctx context.Context, id int64, opts ...Option) (*mod
 	return &server, nil
 }
 
+func (r *repository) Update(ctx context.Context, srv *model.Server) error {
+	res := r.db.WithContext(ctx).
+		Model(&model.Server{ID: srv.ID}).
+		Select("name", "address", "port", "password", "protocol_id", "updated_at").
+		Updates(srv)
+
+	if err := res.Error; err != nil {
+		if errors.Is(err, gorm.ErrForeignKeyViolated) {
+			return fmt.Errorf("update server %d: %w", srv.ID, ErrProtocolNotFound)
+		}
+		return fmt.Errorf("update server %d: %w", srv.ID, err)
+	}
+	if res.RowsAffected == 0 {
+		return fmt.Errorf("update server %d: %w", srv.ID, ErrNotFound)
+	}
+	return nil
+}
+
 // DRY for opts
 func (r *repository) query(ctx context.Context, opts ...Option) *gorm.DB {
 	var o options
