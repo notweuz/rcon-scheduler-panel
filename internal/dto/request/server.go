@@ -15,3 +15,7 @@ type UpdateServer struct {
 	Password   string `json:"password" binding:"omitempty,min=8,max=24"`
 	ProtocolID int64  `json:"protocol_id" binding:"required"`
 }
+
+type ExecuteCommand struct {
+	Command string `json:"command" binding:"required,max=1000"`
+}

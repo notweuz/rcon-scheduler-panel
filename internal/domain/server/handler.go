@@ -20,6 +20,7 @@ type Service interface {
 	GetAll(ctx context.Context) ([]model.Server, error)
 	Delete(ctx context.Context, id int64) error
 	Update(ctx context.Context, srv *model.Server) error
+	Execute(ctx context.Context, id int64, command string) (string, error)
 }
 
 type Handler struct {
@@ -133,6 +134,30 @@ func (h *Handler) Delete(c *gin.Context) {
 	respond.NoContent(c)
 }
 
+func (h *Handler) Execute(c *gin.Context) {
+	var executeCommand request.ExecuteCommand
+	if err := c.ShouldBindJSON(&executeCommand); err != nil {
+		respond.Error(c, validation.FromBindError(err))
+		return
+	}
+
+	var serverID path.ServerID
+	if err := c.ShouldBindUri(&serverID); err != nil {
+		respond.Error(c, validation.FromBindError(err))
+		return
+	}
+
+	res, err := h.service.Execute(c.Request.Context(), serverID.ID, executeCommand.Command)
+	if err != nil {
+		respond.Error(c, err)
+		return
+	}
+
+	respond.OK(c, response.ExecuteResult{
+		Response: res,
+	})
+}
+
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	servers := r.Group("/servers", middleware.Auth(h.cfg))
 	{
@@ -141,5 +166,6 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 		servers.DELETE("/:id", h.Delete)
 		servers.GET("", h.GetAll)
 		servers.POST("", h.Create)
+		servers.POST("/:id/execute", h.Execute)
 	}
 }

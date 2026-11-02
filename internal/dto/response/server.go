@@ -37,3 +37,7 @@ func ServerShortFromModel(s model.Server) ServerShort {
 		CreatedAt:   s.CreatedAt,
 	}
 }
+
+type ExecuteResult struct {
+	Response string `json:"response"`
+}

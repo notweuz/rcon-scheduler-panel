@@ -161,6 +161,78 @@ func (_c *MockService_Delete_Call) RunAndReturn(run func(ctx context.Context, id
 	return _c
 }
 
+// Execute provides a mock function for the type MockService
+func (_mock *MockService) Execute(ctx context.Context, id int64, command string) (string, error) {
+	ret := _mock.Called(ctx, id, command)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Execute")
+	}
+
+	var r0 string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) (string, error)); ok {
+		return returnFunc(ctx, id, command)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) string); ok {
+		r0 = returnFunc(ctx, id, command)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, string) error); ok {
+		r1 = returnFunc(ctx, id, command)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockService_Execute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Execute'
+type MockService_Execute_Call struct {
+	*mock.Call
+}
+
+// Execute is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id int64
+//   - command string
+func (_e *MockService_Expecter) Execute(ctx any, id any, command any) *MockService_Execute_Call {
+	return &MockService_Execute_Call{Call: _e.mock.On("Execute", ctx, id, command)}
+}
+
+func (_c *MockService_Execute_Call) Run(run func(ctx context.Context, id int64, command string)) *MockService_Execute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockService_Execute_Call) Return(s string, err error) *MockService_Execute_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *MockService_Execute_Call) RunAndReturn(run func(ctx context.Context, id int64, command string) (string, error)) *MockService_Execute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetAll provides a mock function for the type MockService
 func (_mock *MockService) GetAll(ctx context.Context) ([]model.Server, error) {
 	ret := _mock.Called(ctx)

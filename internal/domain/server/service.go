@@ -64,14 +64,7 @@ func (s *service) rollbackCreate(ctx context.Context, id int64, cause error) err
 }
 
 func (s *service) GetByID(ctx context.Context, id int64) (*model.Server, error) {
-	srv, err := s.repo.GetByID(ctx, id, WithPreloadProtocol())
-	if err != nil {
-		if errors.Is(err, ErrNotFound) {
-			return nil, errs.ErrNotFound.WithMessage("server not found").WithErr(err)
-		}
-		return nil, err
-	}
-	return srv, nil
+	return s.getByID(ctx, id, WithPreloadProtocol())
 }
 
 func (s *service) GetAll(ctx context.Context) ([]model.Server, error) {
@@ -157,6 +150,25 @@ func (s *service) Update(ctx context.Context, srv *model.Server) error {
 	return nil
 }
 
+func (s *service) Execute(ctx context.Context, id int64, command string) (string, error) {
+	srv, err := s.getByID(ctx, id)
+	if err != nil {
+		return "", fmt.Errorf("execute command for %d server: %w", id, err)
+	}
+
+	response, err := s.sch.Execute(ctx, srv.ToCore().Key(), command)
+	if err != nil {
+		if errors.Is(err, scheduler.ErrServerNotFound) {
+			return "", fmt.Errorf("execute command on server %d: %w", id, err)
+		}
+		return "", errs.ErrBadGateway.
+			WithMessage("game server is unavailable or rejected the command").
+			WithErr(err)
+	}
+
+	return response, nil
+}
+
 func (s *service) rollbackUpdate(ctx context.Context, old *model.Server, cause error) error {
 	failed := []error{cause}
 	if err := s.repo.Update(ctx, old); err != nil {
@@ -187,4 +199,15 @@ func (s *service) register(srv *model.Server) error {
 		}
 	}
 	return nil
+}
+
+func (s *service) getByID(ctx context.Context, id int64, opts ...Option) (*model.Server, error) {
+	srv, err := s.repo.GetByID(ctx, id, opts...)
+	if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			return nil, errs.ErrNotFound.WithMessage("server not found").WithErr(err)
+		}
+		return nil, err
+	}
+	return srv, nil
 }
