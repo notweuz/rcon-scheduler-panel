@@ -4,6 +4,7 @@ import (
 	"context"
 	"rcon-scheduler-panel/internal/config"
 	"rcon-scheduler-panel/internal/dto/path"
+	"rcon-scheduler-panel/internal/dto/request"
 	"rcon-scheduler-panel/internal/dto/response"
 	"rcon-scheduler-panel/internal/middleware"
 	"rcon-scheduler-panel/internal/model"
@@ -30,6 +31,29 @@ func NewHandler(service Service, cfg *config.Config) *Handler {
 		service: service,
 		cfg:     cfg,
 	}
+}
+
+func (h *Handler) Create(c *gin.Context) {
+	var serverReq request.CreateServer
+	if err := c.ShouldBindJSON(&serverReq); err != nil {
+		respond.Error(c, validation.FromBindError(err))
+		return
+	}
+
+	srv := &model.Server{
+		Name:        serverReq.Name,
+		Address:     serverReq.Address,
+		Port:        serverReq.Port,
+		Password:    serverReq.Password,
+		ProtocolID:  serverReq.ProtocolID,
+	}
+
+	if err := h.service.Create(c.Request.Context(), srv); err != nil {
+		respond.Error(c, err)
+		return
+	}
+
+	respond.OK(c, response.ServerShortFromModel(*srv))
 }
 
 func (h *Handler) GetByID(c *gin.Context) {
@@ -80,5 +104,6 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 		servers.GET("/:id", h.GetByID)
 		servers.DELETE("/:id", h.Delete)
 		servers.GET("", h.GetAll)
+		servers.POST("", h.Create)
 	}
 }
