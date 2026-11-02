@@ -53,7 +53,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	respond.OK(c, response.ServerShortFromModel(*srv))
+	respond.Created(c, response.ServerShortFromModel(*srv))
 }
 
 func (h *Handler) GetByID(c *gin.Context) {
