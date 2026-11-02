@@ -9,6 +9,7 @@ import (
 
 	"github.com/notweuz/rcon-scheduler-core/scheduler"
 	coreserver "github.com/notweuz/rcon-scheduler-core/server"
+	"github.com/rs/zerolog/log"
 )
 
 type Repository interface {
@@ -35,22 +36,36 @@ func (s *service) Create(ctx context.Context, srv *model.Server) error {
 		return err
 	}
 
+	created, err := s.repo.GetByID(ctx, srv.ID, WithPreloadProtocol())
+	if err != nil {
+		return s.rollbackCreate(ctx, srv.ID, fmt.Errorf("load created server: %w", err))
+	}
+	srv.Protocol = created.Protocol
+
 	if err := s.sch.Register(srv.ToCore()); err != nil {
 		switch {
 		case errors.Is(err, scheduler.ErrServerExists):
-			return errs.ErrConflict.
+			err = errs.ErrConflict.
 				WithMessage("server already registered").
 				WithErr(err)
 		case errors.Is(err, coreserver.ErrEmptyAddress),
 			errors.Is(err, coreserver.ErrInvalidPort),
 			errors.Is(err, scheduler.ErrUnsupportedType):
-			return errs.ErrBadRequest.WithMessage(err.Error()).WithErr(err)
+			err = errs.ErrBadRequest.WithMessage(err.Error()).WithErr(err)
 		default:
-			return fmt.Errorf("register server in scheduler: %w", err)
+			err = fmt.Errorf("register server in scheduler: %w", err)
 		}
+		return s.rollbackCreate(ctx, srv.ID, err)
 	}
 
 	return nil
+}
+
+func (s *service) rollbackCreate(ctx context.Context, id int64, cause error) error {
+	if _, err := s.repo.Delete(ctx, id); err != nil {
+		return errors.Join(cause, fmt.Errorf("rollback server %d: %w", id, err))
+	}
+	return cause
 }
 
 func (s *service) GetByID(ctx context.Context, id int64) (*model.Server, error) {
@@ -85,13 +100,14 @@ func (s *service) Delete(ctx context.Context, id int64) error {
 		}
 		return err
 	}
-	
+
 	if err := s.sch.Unregister(srv.ToCore().Key()); err != nil {
 		if errors.Is(err, scheduler.ErrServerNotFound) {
-			return errs.ErrNotFound.WithMessage("server not found").WithErr(err)
+			log.Warn().Err(err).Int64("server_id", id).Msg("deleted server wasn't registered in scheduler")
+			return nil
 		}
 		return fmt.Errorf("unregister server in scheduler: %w", err)
 	}
-	
+
 	return nil
 }
