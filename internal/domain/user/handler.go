@@ -45,5 +45,5 @@ func (h *Handler) GetMe(c *gin.Context) {
 
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	auth := r.Group("/users", middleware.Auth(h.cfg))
-	auth.POST("/@me", h.GetMe)
+	auth.GET("/@me", h.GetMe)
 }
