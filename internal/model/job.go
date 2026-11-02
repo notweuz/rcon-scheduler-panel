@@ -28,7 +28,7 @@ func (Job) TableName() string {
 }
 
 func (j Job) ToCore() (corejob.Job, error) {
-	steps := make([]corejob.Step, len(j.Steps))
+	steps := make([]corejob.Step, 0, len(j.Steps))
 
 	for i, s := range j.Steps {
 		step := corejob.Step{Command: s.Command}
