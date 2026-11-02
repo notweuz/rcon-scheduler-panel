@@ -14,7 +14,7 @@ type repository struct {
 }
 
 func NewRepository(db *gorm.DB) Repository {
-	return &repository{}
+	return &repository{db: db}
 }
 
 func (r *repository) Create(ctx context.Context, job *model.Job) error {
