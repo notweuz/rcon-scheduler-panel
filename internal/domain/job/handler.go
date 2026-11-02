@@ -22,6 +22,8 @@ type Service interface {
 	Update(ctx context.Context, job *model.Job) error
 	Delete(ctx context.Context, id int64) error
 	Resume(ctx context.Context) error
+	ScheduleServer(ctx context.Context, serverID int64) error
+	UnscheduleServer(serverID int64) error
 }
 
 type Handler struct {

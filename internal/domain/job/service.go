@@ -15,7 +15,7 @@ import (
 type Repository interface {
 	Create(ctx context.Context, job *model.Job) error
 	GetByID(ctx context.Context, id int64, opts ...Option) (*model.Job, error)
-	GetByServerID(ctx context.Context, serverID int64) ([]model.Job, error)
+	GetByServerID(ctx context.Context, serverID int64, opts ...Option) ([]model.Job, error)
 	GetAll(ctx context.Context, opts ...Option) ([]model.Job, error)
 	Update(ctx context.Context, job *model.Job) error
 	Delete(ctx context.Context, id int64) error
@@ -26,14 +26,19 @@ type service struct {
 	sch  *scheduler.Scheduler
 
 	mu        sync.Mutex
-	scheduled map[int64]uuid.UUID
+	scheduled map[int64]scheduledJob
+}
+
+type scheduledJob struct {
+	serverID int64
+	id       uuid.UUID
 }
 
 func NewService(repo Repository, sch *scheduler.Scheduler) Service {
 	return &service{
 		repo:      repo,
 		sch:       sch,
-		scheduled: make(map[int64]uuid.UUID),
+		scheduled: make(map[int64]scheduledJob),
 	}
 }
 
@@ -152,14 +157,43 @@ func (s *service) Resume(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	return s.scheduleAll(jobs)
+}
 
+func (s *service) ScheduleServer(ctx context.Context, serverID int64) error {
+	jobs, err := s.repo.GetByServerID(ctx, serverID, WithPreloadServer())
+	if err != nil {
+		return err
+	}
+	return s.scheduleAll(jobs)
+}
+
+func (s *service) UnscheduleServer(serverID int64) error {
+	var jobIDs []int64
+	s.mu.Lock()
+	for jobID, sj := range s.scheduled {
+		if sj.serverID == serverID {
+			jobIDs = append(jobIDs, jobID)
+		}
+	}
+	s.mu.Unlock()
+
+	var failed []error
+	for _, jobID := range jobIDs {
+		if err := s.unschedule(jobID); err != nil {
+			failed = append(failed, err)
+		}
+	}
+	return errors.Join(failed...)
+}
+
+func (s *service) scheduleAll(jobs []model.Job) error {
 	var failed []error
 	for _, jb := range jobs {
 		if err := s.schedule(&jb); err != nil {
 			failed = append(failed, err)
 		}
 	}
-
 	return errors.Join(failed...)
 }
 
@@ -175,14 +209,14 @@ func (s *service) schedule(job *model.Job) error {
 	}
 
 	s.mu.Lock()
-	s.scheduled[job.ID] = id
+	s.scheduled[job.ID] = scheduledJob{serverID: job.ServerID, id: id}
 	s.mu.Unlock()
 	return nil
 }
 
 func (s *service) unschedule(jobID int64) error {
 	s.mu.Lock()
-	id, ok := s.scheduled[jobID]
+	sj, ok := s.scheduled[jobID]
 	delete(s.scheduled, jobID)
 	s.mu.Unlock()
 
@@ -190,7 +224,7 @@ func (s *service) unschedule(jobID int64) error {
 		return nil
 	}
 
-	if err := s.sch.RemoveJob(id); err != nil && !errors.Is(err, scheduler.ErrJobNotFound) {
+	if err := s.sch.RemoveJob(sj.id); err != nil && !errors.Is(err, scheduler.ErrJobNotFound) {
 		return fmt.Errorf("remove job %d from scheduler: %w", jobID, err)
 	}
 	return nil
