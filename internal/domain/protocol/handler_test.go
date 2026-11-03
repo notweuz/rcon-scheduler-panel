@@ -2,6 +2,7 @@ package protocol_test
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"rcon-scheduler-panel/internal/auth"
@@ -101,5 +102,119 @@ func TestProtocolHandler_GetByID(t *testing.T) {
 		r.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
+	})
+}
+
+func TestProtocolHandler_GetAll(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	testToken, err := auth.GenerateToken(1, "test")
+	require.NoError(t, err)
+
+	description := "RCON protocol for Source Engine's games"
+	expectedProtocols := []model.Protocol{
+		{
+			ID:          1,
+			Name:        "Source",
+			Description: &description,
+		},
+		{
+			ID:   2,
+			Name: "Minecraft",
+		},
+	}
+
+	t.Run("200 - Protocols Found", func(t *testing.T) {
+		mockSVC := mocks.NewMockService(t)
+		mockSVC.EXPECT().
+			GetAll(mock.Anything).
+			Return(expectedProtocols, nil).
+			Once()
+
+		r := setupRouter(mockSVC)
+
+		req, _ := http.NewRequest(http.MethodGet, "/api/protocols", nil)
+		req.Header.Set("Authorization", "Bearer "+testToken)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		var resp struct {
+			Success bool                `json:"success"`
+			Data    []response.Protocol `json:"data"`
+		}
+		assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+		assert.True(t, resp.Success)
+		assert.Equal(t, http.StatusOK, w.Code)
+		require.Len(t, resp.Data, len(expectedProtocols))
+		assert.Equal(t, expectedProtocols[0].ID, resp.Data[0].ID)
+		assert.Equal(t, expectedProtocols[0].Name, resp.Data[0].Name)
+		assert.Equal(t, *expectedProtocols[0].Description, resp.Data[0].Description)
+		assert.Equal(t, expectedProtocols[1].ID, resp.Data[1].ID)
+		assert.Equal(t, expectedProtocols[1].Name, resp.Data[1].Name)
+		assert.Empty(t, resp.Data[1].Description)
+	})
+
+	t.Run("200 - No Protocols", func(t *testing.T) {
+		mockSVC := mocks.NewMockService(t)
+		mockSVC.EXPECT().
+			GetAll(mock.Anything).
+			Return([]model.Protocol{}, nil).
+			Once()
+
+		r := setupRouter(mockSVC)
+
+		req, _ := http.NewRequest(http.MethodGet, "/api/protocols", nil)
+		req.Header.Set("Authorization", "Bearer "+testToken)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		var resp struct {
+			Success bool                `json:"success"`
+			Data    []response.Protocol `json:"data"`
+		}
+		assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+		assert.True(t, resp.Success)
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Empty(t, resp.Data)
+	})
+
+	t.Run("401 - Unauthorized", func(t *testing.T) {
+		mockSVC := mocks.NewMockService(t)
+
+		r := setupRouter(mockSVC)
+
+		req, _ := http.NewRequest(http.MethodGet, "/api/protocols", nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		var resp struct {
+			Success bool `json:"success"`
+		}
+		assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+		assert.False(t, resp.Success)
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+	})
+
+	t.Run("500 - Service error", func(t *testing.T) {
+		mockSVC := mocks.NewMockService(t)
+		mockSVC.EXPECT().
+			GetAll(mock.Anything).
+			Return(nil, errors.New("database is down")).
+			Once()
+
+		r := setupRouter(mockSVC)
+
+		req, _ := http.NewRequest(http.MethodGet, "/api/protocols", nil)
+		req.Header.Set("Authorization", "Bearer "+testToken)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		var resp struct {
+			Success bool `json:"success"`
+		}
+		assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+		assert.False(t, resp.Success)
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.NotContains(t, w.Body.String(), "database is down")
 	})
 }
