@@ -16,3 +16,6 @@ packages:
   rcon-scheduler-panel/internal/domain/user:
     config:
       all: true
+  rcon-scheduler-panel/internal/domain/protocol:
+    config:
+      all: true
