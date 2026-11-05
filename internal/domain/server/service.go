@@ -133,7 +133,7 @@ func (s *service) Update(ctx context.Context, srv *model.Server) error {
 
 	updated, err := s.repo.GetByID(ctx, srv.ID, WithPreloadProtocol())
 	if err != nil {
-		return s.rollbackUpdate(ctx, old, fmt.Errorf("load updated server: %w", err))
+		return s.rollbackUpdateRecord(ctx, old, fmt.Errorf("load updated server: %w", err))
 	}
 
 	if err := s.jobs.UnscheduleServer(old.ID); err != nil {
@@ -174,6 +174,13 @@ func (s *service) Execute(ctx context.Context, id int64, command string) (string
 	}
 
 	return response, nil
+}
+
+func (s *service) rollbackUpdateRecord(ctx context.Context, old *model.Server, cause error) error {
+	if err := s.repo.Update(ctx, old); err != nil {
+		return errors.Join(cause, fmt.Errorf("rollback server %d: %w", old.ID, err))
+	}
+	return cause
 }
 
 func (s *service) rollbackUpdate(ctx context.Context, old *model.Server, cause error) error {

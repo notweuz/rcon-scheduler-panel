@@ -209,8 +209,15 @@ func (s *service) schedule(job *model.Job) error {
 	}
 
 	s.mu.Lock()
+	prev, wasScheduled := s.scheduled[job.ID]
 	s.scheduled[job.ID] = scheduledJob{serverID: job.ServerID, id: id}
 	s.mu.Unlock()
+
+	if wasScheduled {
+		if err := s.sch.RemoveJob(prev.id); err != nil && !errors.Is(err, scheduler.ErrJobNotFound) {
+			return fmt.Errorf("remove previous copy of job %d from scheduler: %w", job.ID, err)
+		}
+	}
 	return nil
 }
 
