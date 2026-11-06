@@ -20,7 +20,7 @@ type Service interface {
 
 type Handler struct {
 	service Service
-	cfg *config.Config
+	cfg     *config.Config
 }
 
 func NewHandler(service Service, cfg *config.Config) *Handler {
@@ -30,6 +30,17 @@ func NewHandler(service Service, cfg *config.Config) *Handler {
 	}
 }
 
+// GetByID godoc
+//
+//	@Summary	Get protocol by ID
+//	@Tags		protocols
+//	@Produce	json
+//	@Security	BearerAuth
+//	@Param		id	path		int	true	"Protocol ID"
+//	@Success	200	{object}	response.Response{data=response.Protocol}
+//	@Failure	401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
+//	@Failure	404	{object}	response.Response{error=response.ErrorInfo}	"Protocol not found"
+//	@Router		/protocols/{id} [get]
 func (h *Handler) GetByID(c *gin.Context) {
 	var protocolID path.ProtocolID
 	if err := c.ShouldBindUri(&protocolID); err != nil {
@@ -46,6 +57,15 @@ func (h *Handler) GetByID(c *gin.Context) {
 	respond.OK(c, response.ProtocolFromModel(*protocol))
 }
 
+// GetAll godoc
+//
+//	@Summary	List protocols
+//	@Tags		protocols
+//	@Produce	json
+//	@Security	BearerAuth
+//	@Success	200	{object}	response.Response{data=[]response.Protocol}
+//	@Failure	401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
+//	@Router		/protocols [get]
 func (h *Handler) GetAll(c *gin.Context) {
 	protocols, err := h.service.GetAll(c.Request.Context())
 	if err != nil {

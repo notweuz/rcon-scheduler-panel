@@ -53,7 +53,7 @@ func TestUserHandler_GetMe(t *testing.T) {
 
 		r := setupRouter(mockSVC)
 
-		req, _ := http.NewRequest(http.MethodGet, "/api/users/@me", nil)
+		req, _ := http.NewRequest(http.MethodGet, "/api/users/me", nil)
 		req.Header.Set("Authorization", "Bearer "+testToken)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
@@ -75,7 +75,7 @@ func TestUserHandler_GetMe(t *testing.T) {
 
 		r := setupRouter(mockSVC)
 
-		req, _ := http.NewRequest(http.MethodGet, "/api/users/@me", nil)
+		req, _ := http.NewRequest(http.MethodGet, "/api/users/me", nil)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 

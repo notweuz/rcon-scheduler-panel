@@ -8,10 +8,10 @@ import (
 )
 
 type Server struct {
-	ID          int64  `gorm:"primaryKey"`
+	ID          int64 `gorm:"primaryKey"`
 	Name        string
 	Address     string
-	Port 		uint16
+	Port        uint16
 	Password    string
 	ProtocolID  int64
 	Protocol    *Protocol

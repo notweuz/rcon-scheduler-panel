@@ -23,6 +23,18 @@ func NewHandler(svc Service) *Handler {
 	return &Handler{service: svc}
 }
 
+// Login godoc
+//
+//	@Summary		Login
+//	@Description	Validates username and password, then returns a JWT token
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			credentials	body		request.AuthCredentials	true	"Username and password"
+//	@Success		200			{object}	response.Response{data=response.AuthResponse}
+//	@Failure		400			{object}	response.Response{error=response.ErrorInfo}	"Validation error"
+//	@Failure		401			{object}	response.Response{error=response.ErrorInfo}	"Invalid credentials"
+//	@Router			/auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
 	var req request.AuthCredentials
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -38,6 +50,18 @@ func (h *Handler) Login(c *gin.Context) {
 	respond.OK(c, response.AuthResponse{Token: token})
 }
 
+// Register godoc
+//
+//	@Summary		Register
+//	@Description	Creates a new user and returns a JWT token
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			credentials	body		request.AuthCredentials	true	"Username and password"
+//	@Success		201			{object}	response.Response{data=response.AuthResponse}
+//	@Failure		400			{object}	response.Response{error=response.ErrorInfo}	"Validation error"
+//	@Failure		403			{object}	response.Response{error=response.ErrorInfo}	"Registration is closed"
+//	@Router			/auth/register [post]
 func (h *Handler) Register(c *gin.Context) {
 	var req request.AuthCredentials
 	if err := c.ShouldBindJSON(&req); err != nil {

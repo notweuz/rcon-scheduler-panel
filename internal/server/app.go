@@ -15,10 +15,14 @@ import (
 	"rcon-scheduler-panel/internal/validation"
 	"time"
 
+	_ "rcon-scheduler-panel/docs"
+
 	"github.com/gin-contrib/cors"
-	"github.com/notweuz/rcon-scheduler-core/scheduler"
 	"github.com/gin-gonic/gin"
+	"github.com/notweuz/rcon-scheduler-core/scheduler"
 	"github.com/rs/zerolog/log"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"gorm.io/gorm"
 )
@@ -61,6 +65,8 @@ func NewApp(cfg *config.Config) (App, error) {
 	r.NoRoute(middleware.NoRoute())
 	r.NoMethod(middleware.NoMethod())
 
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	api := r.Group("/api")
 
 	userRepo := user.NewRepository(db)
@@ -78,10 +84,10 @@ func NewApp(cfg *config.Config) (App, error) {
 		log.Error().Err(err).Msg("failed to resume scheduler")
 		return nil, err
 	}
-	
-	MakeRoutes(api, 
-		auth.NewHandler(authSVC), 
-		user.NewHandler(userSVC, cfg), 
+
+	MakeRoutes(api,
+		auth.NewHandler(authSVC),
+		user.NewHandler(userSVC, cfg),
 		job.NewHandler(jobSVC, cfg),
 		server.NewHandler(serverSVC, cfg),
 		protocol.NewHandler(protocolSVC, cfg),

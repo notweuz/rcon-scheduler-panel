@@ -15,7 +15,7 @@ func Logger() gin.HandlerFunc {
 
 		status := c.Writer.Status()
 		var ev *zerolog.Event
-		
+
 		switch {
 		case status >= 500:
 			ev = log.Error()

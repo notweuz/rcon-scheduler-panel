@@ -12,6 +12,17 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+//	@title			RCON Scheduler Panel API
+//	@version		1.0
+//	@description	API for RCON Scheduler Panel.
+
+//	@BasePath	/api
+
+//	@securityDefinitions.apikey	BearerAuth
+//	@in							header
+//	@name						Authorization
+//	@description				Enter "Bearer <token>" (token from /auth/login).
+
 func main() {
 	logger.Setup()
 	log.Info().Msg("Starting server")

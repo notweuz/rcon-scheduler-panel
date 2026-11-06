@@ -30,6 +30,17 @@ func NewHandler(service Service, cfg *config.Config) *Handler {
 	}
 }
 
+// GetMe godoc
+//
+//	@Summary		Get current user
+//	@Description	Returns the user the token belongs to.
+//	@Tags			users
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Success		200	{object}	response.Response{data=response.UserShort}
+//	@Failure		401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
+//	@Failure		404	{object}	response.Response{error=response.ErrorInfo}	"User not found"
+//	@Router			/users/me [get]
 func (h *Handler) GetMe(c *gin.Context) {
 	userID, err := middleware.GetUserIDFromContext(c)
 	if err != nil {
@@ -46,5 +57,5 @@ func (h *Handler) GetMe(c *gin.Context) {
 
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	auth := r.Group("/users", middleware.Auth(h.cfg))
-	auth.GET("/@me", h.GetMe)
+	auth.GET("/me", h.GetMe)
 }

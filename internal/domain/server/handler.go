@@ -35,6 +35,20 @@ func NewHandler(service Service, cfg *config.Config) *Handler {
 	}
 }
 
+// Create godoc
+//
+//	@Summary		Create server
+//	@Description	Adds an RCON server to the panel.
+//	@Tags			servers
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			server	body		request.CreateServer	true	"Server data"
+//	@Success		201		{object}	response.Response{data=response.ServerShort}
+//	@Failure		400		{object}	response.Response{error=response.ErrorInfo}	"Validation error"
+//	@Failure		401		{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
+//	@Failure		409		{object}	response.Response{error=response.ErrorInfo}	"Server already exists"
+//	@Router			/servers [post]
 func (h *Handler) Create(c *gin.Context) {
 	var serverReq request.CreateServer
 	if err := c.ShouldBindJSON(&serverReq); err != nil {
@@ -43,11 +57,11 @@ func (h *Handler) Create(c *gin.Context) {
 	}
 
 	srv := &model.Server{
-		Name:        serverReq.Name,
-		Address:     serverReq.Address,
-		Port:        serverReq.Port,
-		Password:    serverReq.Password,
-		ProtocolID:  serverReq.ProtocolID,
+		Name:       serverReq.Name,
+		Address:    serverReq.Address,
+		Port:       serverReq.Port,
+		Password:   serverReq.Password,
+		ProtocolID: serverReq.ProtocolID,
 	}
 
 	if err := h.service.Create(c.Request.Context(), srv); err != nil {
@@ -58,6 +72,17 @@ func (h *Handler) Create(c *gin.Context) {
 	respond.Created(c, response.ServerShortFromModel(*srv))
 }
 
+// GetByID godoc
+//
+//	@Summary	Get server by ID
+//	@Tags		servers
+//	@Produce	json
+//	@Security	BearerAuth
+//	@Param		id	path		int	true	"Server ID"
+//	@Success	200	{object}	response.Response{data=response.ServerShort}
+//	@Failure	401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
+//	@Failure	404	{object}	response.Response{error=response.ErrorInfo}	"Server not found"
+//	@Router		/servers/{id} [get]
 func (h *Handler) GetByID(c *gin.Context) {
 	var serverID path.ServerID
 	if err := c.ShouldBindUri(&serverID); err != nil {
@@ -74,6 +99,15 @@ func (h *Handler) GetByID(c *gin.Context) {
 	respond.OK(c, response.ServerShortFromModel(*server))
 }
 
+// GetAll godoc
+//
+//	@Summary	List servers
+//	@Tags		servers
+//	@Produce	json
+//	@Security	BearerAuth
+//	@Success	200	{object}	response.Response{data=[]response.ServerShort}
+//	@Failure	401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
+//	@Router		/servers [get]
 func (h *Handler) GetAll(c *gin.Context) {
 	servers, err := h.service.GetAll(c.Request.Context())
 	if err != nil {
@@ -88,6 +122,22 @@ func (h *Handler) GetAll(c *gin.Context) {
 	respond.OK(c, serverDTOs)
 }
 
+// Update godoc
+//
+//	@Summary		Update server
+//	@Description	Replaces server data. Empty password keeps the current one.
+//	@Tags			servers
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			id		path		int						true	"Server ID"
+//	@Param			server	body		request.UpdateServer	true	"Server data"
+//	@Success		200		{object}	response.Response{data=response.ServerShort}
+//	@Failure		400		{object}	response.Response{error=response.ErrorInfo}	"Validation error"
+//	@Failure		401		{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
+//	@Failure		404		{object}	response.Response{error=response.ErrorInfo}	"Server or protocol not found"
+//	@Failure		409		{object}	response.Response{error=response.ErrorInfo}	"Server already registered"
+//	@Router			/servers/{id} [put]
 func (h *Handler) Update(c *gin.Context) {
 	var serverID path.ServerID
 	if err := c.ShouldBindUri(&serverID); err != nil {
@@ -118,6 +168,17 @@ func (h *Handler) Update(c *gin.Context) {
 	respond.OK(c, response.ServerShortFromModel(*srv))
 }
 
+// Delete godoc
+//
+//	@Summary		Delete server
+//	@Description	Deletes the server and unschedules its jobs.
+//	@Tags			servers
+//	@Security		BearerAuth
+//	@Param			id	path	int	true	"Server ID"
+//	@Success		204	"No Content"
+//	@Failure		401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
+//	@Failure		404	{object}	response.Response{error=response.ErrorInfo}	"Server not found"
+//	@Router			/servers/{id} [delete]
 func (h *Handler) Delete(c *gin.Context) {
 	var serverID path.ServerID
 	if err := c.ShouldBindUri(&serverID); err != nil {
@@ -134,6 +195,22 @@ func (h *Handler) Delete(c *gin.Context) {
 	respond.NoContent(c)
 }
 
+// Execute godoc
+//
+//	@Summary		Execute RCON command
+//	@Description	Sends a command to the server and returns its response.
+//	@Tags			servers
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			id		path		int						true	"Server ID"
+//	@Param			command	body		request.ExecuteCommand	true	"Command"
+//	@Success		200		{object}	response.Response{data=response.ExecuteResult}
+//	@Failure		400		{object}	response.Response{error=response.ErrorInfo}	"Validation error"
+//	@Failure		401		{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
+//	@Failure		404		{object}	response.Response{error=response.ErrorInfo}	"Server not found"
+//	@Failure		502		{object}	response.Response{error=response.ErrorInfo}	"Server did not respond over RCON"
+//	@Router			/servers/{id}/execute [post]
 func (h *Handler) Execute(c *gin.Context) {
 	var executeCommand request.ExecuteCommand
 	if err := c.ShouldBindJSON(&executeCommand); err != nil {
