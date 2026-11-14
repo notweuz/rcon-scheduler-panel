@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"rcon-scheduler-panel/internal/auth"
 	"rcon-scheduler-panel/internal/config"
 	"rcon-scheduler-panel/internal/dto/header"
@@ -12,7 +11,8 @@ import (
 )
 
 var (
-	ErrTokenMissing = errs.ErrUnauthorized.WithMessage("authorization token is missing!")
+	ErrTokenMissing      = errs.ErrUnauthorized.WithCode("TOKEN_MISSING").WithMessage("authorization header is missing")
+	ErrInvalidAuthHeader = errs.ErrUnauthorized.WithCode("INVALID_AUTHORIZATION_HEADER").WithMessage("authorization header must use the Bearer scheme")
 )
 
 const userIDContextKey = "user_id"
@@ -28,14 +28,14 @@ func Auth(cfg *config.Config) gin.HandlerFunc {
 
 		scheme, token, ok := strings.Cut(header.Token, " ")
 		if !ok || !strings.EqualFold(scheme, "Bearer") || token == "" {
-			_ = c.Error(errs.ErrUnauthorized.WithMessage("invalid authorization header"))
+			_ = c.Error(ErrInvalidAuthHeader)
 			c.Abort()
 			return
 		}
 
 		userID, err := auth.ParseToken(token, cfg.JWTSecret)
 		if err != nil {
-			_ = c.Error(fmt.Errorf("token parse error in auth middleware: %w", err))
+			_ = c.Error(err)
 			c.Abort()
 			return
 		}

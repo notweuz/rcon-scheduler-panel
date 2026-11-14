@@ -37,9 +37,10 @@ func NewHandler(service Service, cfg *config.Config) *Handler {
 //	@Tags			users
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Success		200	{object}	response.Response{data=response.UserShort}
-//	@Failure		401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
-//	@Failure		404	{object}	response.Response{error=response.ErrorInfo}	"User not found"
+//	@Success		200	{object}	response.UserShort
+//	@Failure		401	{object}	response.Problem	"Missing or invalid token"
+//	@Failure		404	{object}	response.Problem	"User not found"
+//	@Failure		500	{object}	response.Problem	"Internal server error"
 //	@Router			/users/me [get]
 func (h *Handler) GetMe(c *gin.Context) {
 	userID, err := middleware.GetUserIDFromContext(c)

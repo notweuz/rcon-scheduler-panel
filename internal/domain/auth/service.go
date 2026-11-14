@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-var errInvalidCredentials = errs.ErrUnauthorized.WithMessage("invalid credentials")
+var errInvalidCredentials = errs.ErrUnauthorized.WithCode("INVALID_CREDENTIALS").WithMessage("invalid username or password")
 
 type service struct {
 	userSVC user.Service
@@ -34,7 +34,7 @@ func (s *service) Register(ctx context.Context, req request.AuthCredentials) (st
 			return "", fmt.Errorf("register: count users: %w", err)
 		}
 		if count > 0 {
-			return "", errs.ErrForbidden.WithMessage("registration is disabled")
+			return "", errs.ErrForbidden.WithCode("REGISTRATION_DISABLED").WithMessage("registration is disabled")
 		}
 	}
 

@@ -25,7 +25,7 @@ func NewService(repo Repository) Service {
 func (s *service) Create(ctx context.Context, u *model.User) error {
 	if err := s.repo.Create(ctx, u); err != nil {
 		if errors.Is(err, ErrAlreadyExists) {
-			return errs.ErrConflict.WithMessage("user already exists").WithErr(err)
+			return errs.ErrConflict.WithCode("USER_ALREADY_EXISTS").WithMessage("user already exists").WithErr(err)
 		}
 		return err
 	}
@@ -36,7 +36,7 @@ func (s *service) GetByID(ctx context.Context, id int64) (*model.User, error) {
 	u, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			return nil, errs.ErrNotFound.WithMessage("user not found").WithErr(err)
+			return nil, errs.ErrNotFound.WithCode("USER_NOT_FOUND").WithMessage("user not found").WithErr(err)
 		}
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (s *service) GetByUsername(ctx context.Context, username string) (*model.Us
 	u, err := s.repo.GetByUsername(ctx, username)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			return nil, errs.ErrNotFound.WithMessage("user not found").WithErr(err)
+			return nil, errs.ErrNotFound.WithCode("USER_NOT_FOUND").WithMessage("user not found").WithErr(err)
 		}
 		return nil, err
 	}

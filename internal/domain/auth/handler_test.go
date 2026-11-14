@@ -63,13 +63,9 @@ func TestAuthHandler_Login(t *testing.T) {
 
 		require.Equal(t, http.StatusOK, w.Code)
 
-		var resp struct {
-			Success bool                  `json:"success"`
-			Data    response.AuthResponse `json:"data"`
-		}
+		var resp response.Token
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
-		assert.Equal(t, "jwt-token", resp.Data.Token)
+		assert.Equal(t, "jwt-token", resp.AccessToken)
 	})
 
 	t.Run("400 - Bad Request (malformed JSON)", func(t *testing.T) {
@@ -106,18 +102,17 @@ func TestAuthHandler_Login(t *testing.T) {
 
 		require.Equal(t, http.StatusBadRequest, w.Code)
 
-		var resp response.Response
+		var resp response.Problem
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		require.NotNil(t, resp.Error)
-		assert.Contains(t, resp.Error.Fields, "username")
-		assert.Contains(t, resp.Error.Fields, "password")
+		assert.Contains(t, fieldNames(resp.Errors), "username")
+		assert.Contains(t, fieldNames(resp.Errors), "password")
 	})
 
 	t.Run("401 - Invalid Credentials", func(t *testing.T) {
 		mockSVC := mocks.NewMockService(t)
 		mockSVC.EXPECT().
 			Login(mock.Anything, validReq).
-			Return("", errs.ErrUnauthorized.WithMessage("invalid credentials")).
+			Return("", errs.ErrUnauthorized.WithMessage("invalid username or password")).
 			Once()
 
 		r := setupRouter(mockSVC)
@@ -127,11 +122,10 @@ func TestAuthHandler_Login(t *testing.T) {
 
 		require.Equal(t, http.StatusUnauthorized, w.Code)
 
-		var resp response.Response
+		var resp response.Problem
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.False(t, resp.Success)
-		require.NotNil(t, resp.Error)
-		assert.Equal(t, "invalid credentials", resp.Error.Message)
+		assert.NotEmpty(t, resp.Code)
+		assert.Equal(t, "invalid username or password", resp.Detail)
 	})
 
 	t.Run("500 - Internal Server Error (unexpected service error)", func(t *testing.T) {
@@ -172,13 +166,9 @@ func TestAuthHandler_Register(t *testing.T) {
 
 		require.Equal(t, http.StatusCreated, w.Code)
 
-		var resp struct {
-			Success bool                  `json:"success"`
-			Data    response.AuthResponse `json:"data"`
-		}
+		var resp response.Token
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
-		assert.Equal(t, "jwt-token", resp.Data.Token)
+		assert.Equal(t, "jwt-token", resp.AccessToken)
 	})
 
 	t.Run("400 - Bad Request (malformed JSON)", func(t *testing.T) {
@@ -207,13 +197,12 @@ func TestAuthHandler_Register(t *testing.T) {
 
 		require.Equal(t, http.StatusBadRequest, w.Code)
 
-		var resp response.Response
+		var resp response.Problem
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		require.NotNil(t, resp.Error)
-		require.Contains(t, resp.Error.Fields, "username")
-		require.Contains(t, resp.Error.Fields, "password")
-		assert.Equal(t, "max", resp.Error.Fields["username"].Code)
-		assert.Equal(t, "max", resp.Error.Fields["password"].Code)
+		require.Contains(t, fieldNames(resp.Errors), "username")
+		require.Contains(t, fieldNames(resp.Errors), "password")
+		assert.Equal(t, "max", fieldCode(resp.Errors, "username"))
+		assert.Equal(t, "max", fieldCode(resp.Errors, "password"))
 	})
 
 	t.Run("400 - Bad Request (invalid field type)", func(t *testing.T) {
@@ -241,10 +230,9 @@ func TestAuthHandler_Register(t *testing.T) {
 
 		require.Equal(t, http.StatusForbidden, w.Code)
 
-		var resp response.Response
+		var resp response.Problem
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		require.NotNil(t, resp.Error)
-		assert.Equal(t, "registration is disabled", resp.Error.Message)
+		assert.Equal(t, "registration is disabled", resp.Detail)
 	})
 
 	t.Run("409 - Conflict (user already exists)", func(t *testing.T) {

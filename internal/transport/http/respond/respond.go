@@ -8,24 +8,23 @@ import (
 )
 
 func OK(c *gin.Context, data any) {
-	c.JSON(http.StatusOK, response.Response{
-		Success: true,
-		Data:    data,
-	})
+	c.JSON(http.StatusOK, data)
+}
+
+func Created(c *gin.Context, data any) {
+	c.JSON(http.StatusCreated, data)
 }
 
 func NoContent(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-func Created(c *gin.Context, data any) {
-	c.JSON(http.StatusCreated, response.Response{
-		Success: true,
-		Data:    data,
-	})
-}
-
 func Error(c *gin.Context, err error) {
 	_ = c.Error(err)
 	c.Abort()
+}
+
+func Problem(c *gin.Context, p response.Problem) {
+	c.Header("Content-Type", response.ProblemContentType)
+	c.AbortWithStatusJSON(p.Status, p)
 }

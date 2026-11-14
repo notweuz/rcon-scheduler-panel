@@ -69,7 +69,7 @@ func TestParseToken(t *testing.T) {
 		{
 			name:    "no expiration",
 			token:   signToken(t, jwt.SigningMethodHS256, []byte(testSecret), noExpiration),
-			wantMsg: errs.ErrUnauthorized.Message,
+			wantMsg: auth.ErrJWTInvalid.Message,
 		},
 		{
 			name:  "other HMAC method",
@@ -82,27 +82,27 @@ func TestParseToken(t *testing.T) {
 		{
 			name:    "subject is not a number",
 			token:   signToken(t, jwt.SigningMethodHS256, []byte(testSecret), validClaims("admin")),
-			wantMsg: errs.ErrUnauthorized.Message,
+			wantMsg: auth.ErrJWTInvalid.Message,
 		},
 		{
 			name:    "subject is zero",
 			token:   signToken(t, jwt.SigningMethodHS256, []byte(testSecret), validClaims("0")),
-			wantMsg: errs.ErrUnauthorized.Message,
+			wantMsg: auth.ErrJWTInvalid.Message,
 		},
 		{
 			name:    "subject is negative",
 			token:   signToken(t, jwt.SigningMethodHS256, []byte(testSecret), validClaims("-1")),
-			wantMsg: errs.ErrUnauthorized.Message,
+			wantMsg: auth.ErrJWTInvalid.Message,
 		},
 		{
 			name:    "garbage",
 			token:   "not-a-jwt",
-			wantMsg: errs.ErrUnauthorized.Message,
+			wantMsg: auth.ErrJWTInvalid.Message,
 		},
 		{
 			name:    "empty",
 			token:   "",
-			wantMsg: errs.ErrUnauthorized.Message,
+			wantMsg: auth.ErrJWTInvalid.Message,
 		},
 	}
 

@@ -44,15 +44,15 @@ func NewService(repo Repository, sch *scheduler.Scheduler) Service {
 
 func (s *service) Create(ctx context.Context, job *model.Job) error {
 	if _, err := job.ToCore(); err != nil {
-		return errs.ErrBadRequest.WithMessage(err.Error()).WithErr(err)
+		return errs.ErrBadRequest.WithCode("INVALID_JOB").WithMessage(err.Error()).WithErr(err)
 	}
 
 	if err := s.repo.Create(ctx, job); err != nil {
 		switch {
 		case errors.Is(err, ErrAlreadyExists):
-			return errs.ErrConflict.WithMessage("job already exist").WithErr(err)
+			return errs.ErrConflict.WithCode("JOB_ALREADY_EXISTS").WithMessage("job already exists").WithErr(err)
 		case errors.Is(err, ErrServerNotFound):
-			return errs.ErrNotFound.WithMessage("server not found").WithErr(err)
+			return errs.ErrNotFound.WithCode("SERVER_NOT_FOUND").WithMessage("server not found").WithErr(err)
 		}
 		return err
 	}
@@ -80,7 +80,7 @@ func (s *service) GetByID(ctx context.Context, id int64) (*model.Job, error) {
 	job, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			return nil, errs.ErrNotFound.WithMessage("job not found").WithErr(err)
+			return nil, errs.ErrNotFound.WithCode("JOB_NOT_FOUND").WithMessage("job not found").WithErr(err)
 		}
 		return nil, err
 	}
@@ -115,12 +115,12 @@ func (s *service) GetAll(ctx context.Context) ([]model.Job, error) {
 
 func (s *service) Update(ctx context.Context, job *model.Job) error {
 	if _, err := job.ToCore(); err != nil {
-		return errs.ErrBadRequest.WithMessage(err.Error()).WithErr(err)
+		return errs.ErrBadRequest.WithCode("INVALID_JOB").WithMessage(err.Error()).WithErr(err)
 	}
 
 	if err := s.repo.Update(ctx, job); err != nil {
 		if errors.Is(err, ErrNotFound) {
-			return errs.ErrNotFound.WithMessage("job not found").WithErr(err)
+			return errs.ErrNotFound.WithCode("JOB_NOT_FOUND").WithMessage("job not found").WithErr(err)
 		}
 		return err
 	}
@@ -144,7 +144,7 @@ func (s *service) Update(ctx context.Context, job *model.Job) error {
 func (s *service) Delete(ctx context.Context, id int64) error {
 	if err := s.repo.Delete(ctx, id); err != nil {
 		if errors.Is(err, ErrNotFound) {
-			return errs.ErrNotFound.WithMessage("job not found").WithErr(err)
+			return errs.ErrNotFound.WithCode("JOB_NOT_FOUND").WithMessage("job not found").WithErr(err)
 		}
 		return err
 	}

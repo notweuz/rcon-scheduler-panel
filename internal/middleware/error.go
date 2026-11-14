@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"rcon-scheduler-panel/internal/dto/response"
 	"rcon-scheduler-panel/internal/errs"
+	"rcon-scheduler-panel/internal/transport/http/respond"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -43,8 +44,6 @@ func ErrorHandler() gin.HandlerFunc {
 		}
 
 		status := httpStatus(appErr.Kind)
-		code, message, fields := appErr.Code, appErr.Message, appErr.Fields
-
 		if status >= http.StatusInternalServerError {
 			log.Error().
 				Err(err).
@@ -54,18 +53,30 @@ func ErrorHandler() gin.HandlerFunc {
 		}
 
 		if status == http.StatusInternalServerError {
-			code = errs.ErrInternalServer.Code
-			message = errs.ErrInternalServer.Message
-			fields = nil
+			appErr = errs.ErrInternalServer
 		}
 
-		c.AbortWithStatusJSON(status, response.Response{
-			Success: false,
-			Error: &response.ErrorInfo{
-				Code:    code,
-				Message: message,
-				Fields:  fields,
-			},
-		})
+		if status == http.StatusUnauthorized {
+			c.Header("WWW-Authenticate", `Bearer realm="api"`)
+		}
+
+		respond.Problem(c, newProblem(c, status, appErr))
 	}
+}
+
+func newProblem(c *gin.Context, status int, e *errs.AppError) response.Problem {
+	p := response.Problem{
+		Title:    http.StatusText(status),
+		Status:   status,
+		Detail:   e.Message,
+		Instance: c.Request.URL.Path,
+		Code:     e.Code,
+	}
+	if len(e.Violations) > 0 {
+		p.Errors = make([]response.InvalidParam, len(e.Violations))
+		for i, v := range e.Violations {
+			p.Errors[i] = response.InvalidParam{Field: v.Field, Code: v.Code, Param: v.Param}
+		}
+	}
+	return p
 }

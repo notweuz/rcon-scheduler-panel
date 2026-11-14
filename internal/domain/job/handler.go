@@ -48,11 +48,12 @@ func NewHandler(service Service, cfg *config.Config) *Handler {
 //	@Security		BearerAuth
 //	@Param			id	path		int					true	"Server ID"
 //	@Param			job	body		request.CreateJob	true	"Job data"
-//	@Success		201	{object}	response.Response{data=response.Job}
-//	@Failure		400	{object}	response.Response{error=response.ErrorInfo}	"Validation error or invalid cron"
-//	@Failure		401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
-//	@Failure		404	{object}	response.Response{error=response.ErrorInfo}	"Server not found"
-//	@Failure		409	{object}	response.Response{error=response.ErrorInfo}	"Job already exists"
+//	@Success		201	{object}	response.Job
+//	@Failure		400	{object}	response.Problem	"Validation error or invalid cron"
+//	@Failure		401	{object}	response.Problem	"Missing or invalid token"
+//	@Failure		404	{object}	response.Problem	"Server not found"
+//	@Failure		409	{object}	response.Problem	"Job already exists"
+//	@Failure		500	{object}	response.Problem	"Internal server error"
 //	@Router			/servers/{id}/jobs [post]
 func (h *Handler) Create(c *gin.Context) {
 	var serverID path.ServerID
@@ -90,9 +91,10 @@ func (h *Handler) Create(c *gin.Context) {
 //	@Produce	json
 //	@Security	BearerAuth
 //	@Param		id	path		int	true	"Job ID"
-//	@Success	200	{object}	response.Response{data=response.Job}
-//	@Failure	401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
-//	@Failure	404	{object}	response.Response{error=response.ErrorInfo}	"Job not found"
+//	@Success	200	{object}	response.Job
+//	@Failure	401	{object}	response.Problem	"Missing or invalid token"
+//	@Failure	404	{object}	response.Problem	"Job not found"
+//	@Failure	500	{object}	response.Problem	"Internal server error"
 //	@Router		/jobs/{id} [get]
 func (h *Handler) GetByID(c *gin.Context) {
 	var jobID path.JobID
@@ -116,9 +118,10 @@ func (h *Handler) GetByID(c *gin.Context) {
 //	@Produce	json
 //	@Security	BearerAuth
 //	@Param		id	path		int	true	"Server ID"
-//	@Success	200	{object}	response.Response{data=[]response.Job}
-//	@Failure	400	{object}	response.Response{error=response.ErrorInfo}	"Validation error"
-//	@Failure	401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
+//	@Success	200	{object}	response.JobList
+//	@Failure	400	{object}	response.Problem	"Validation error"
+//	@Failure	401	{object}	response.Problem	"Missing or invalid token"
+//	@Failure	500	{object}	response.Problem	"Internal server error"
 //	@Router		/servers/{id}/jobs [get]
 func (h *Handler) GetByServerID(c *gin.Context) {
 	var serverID path.JobServerID
@@ -133,11 +136,7 @@ func (h *Handler) GetByServerID(c *gin.Context) {
 		return
 	}
 
-	jobsDTOs := make([]response.Job, len(jobs))
-	for i, job := range jobs {
-		jobsDTOs[i] = response.JobFromModel(job)
-	}
-	respond.OK(c, jobsDTOs)
+	respond.OK(c, response.MapList(jobs, response.JobFromModel))
 }
 
 // Update godoc
@@ -150,10 +149,11 @@ func (h *Handler) GetByServerID(c *gin.Context) {
 //	@Security		BearerAuth
 //	@Param			id	path		int					true	"Job ID"
 //	@Param			job	body		request.CreateJob	true	"Job data"
-//	@Success		200	{object}	response.Response{data=response.Job}
-//	@Failure		400	{object}	response.Response{error=response.ErrorInfo}	"Validation error or invalid cron"
-//	@Failure		401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
-//	@Failure		404	{object}	response.Response{error=response.ErrorInfo}	"Job not found"
+//	@Success		200	{object}	response.Job
+//	@Failure		400	{object}	response.Problem	"Validation error or invalid cron"
+//	@Failure		401	{object}	response.Problem	"Missing or invalid token"
+//	@Failure		404	{object}	response.Problem	"Job not found"
+//	@Failure		500	{object}	response.Problem	"Internal server error"
 //	@Router			/jobs/{id} [put]
 func (h *Handler) Update(c *gin.Context) {
 	var jobID path.JobID
@@ -191,8 +191,9 @@ func (h *Handler) Update(c *gin.Context) {
 //	@Security	BearerAuth
 //	@Param		id	path	int	true	"Job ID"
 //	@Success	204	"No Content"
-//	@Failure	401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
-//	@Failure	404	{object}	response.Response{error=response.ErrorInfo}	"Job not found"
+//	@Failure	401	{object}	response.Problem	"Missing or invalid token"
+//	@Failure	404	{object}	response.Problem	"Job not found"
+//	@Failure	500	{object}	response.Problem	"Internal server error"
 //	@Router		/jobs/{id} [delete]
 func (h *Handler) Delete(c *gin.Context) {
 	var jobID path.JobID

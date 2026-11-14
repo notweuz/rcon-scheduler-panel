@@ -42,7 +42,7 @@ func NewService(repo Repository, sch *scheduler.Scheduler, jobs JobScheduler) Se
 func (s *service) Create(ctx context.Context, srv *model.Server) error {
 	if err := s.repo.Create(ctx, srv); err != nil {
 		if errors.Is(err, ErrAlreadyExists) {
-			return errs.ErrConflict.WithMessage("server already exist").WithErr(err)
+			return errs.ErrConflict.WithCode("SERVER_ALREADY_EXISTS").WithMessage("server already exists").WithErr(err)
 		}
 		return err
 	}
@@ -88,7 +88,7 @@ func (s *service) Delete(ctx context.Context, id int64) error {
 	srv, err := s.repo.Delete(ctx, id)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			return errs.ErrNotFound.WithMessage("server not found").WithErr(err)
+			return errs.ErrNotFound.WithCode("SERVER_NOT_FOUND").WithMessage("server not found").WithErr(err)
 		}
 		return err
 	}
@@ -112,7 +112,7 @@ func (s *service) Update(ctx context.Context, srv *model.Server) error {
 	old, err := s.repo.GetByID(ctx, srv.ID, WithPreloadProtocol())
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			return errs.ErrNotFound.WithMessage("server not found").WithErr(err)
+			return errs.ErrNotFound.WithCode("SERVER_NOT_FOUND").WithMessage("server not found").WithErr(err)
 		}
 		return err
 	}
@@ -124,9 +124,9 @@ func (s *service) Update(ctx context.Context, srv *model.Server) error {
 	if err := s.repo.Update(ctx, srv); err != nil {
 		switch {
 		case errors.Is(err, ErrNotFound):
-			return errs.ErrNotFound.WithMessage("server not found").WithErr(err)
+			return errs.ErrNotFound.WithCode("SERVER_NOT_FOUND").WithMessage("server not found").WithErr(err)
 		case errors.Is(err, ErrProtocolNotFound):
-			return errs.ErrNotFound.WithMessage("protocol not found").WithErr(err)
+			return errs.ErrNotFound.WithCode("PROTOCOL_NOT_FOUND").WithMessage("protocol not found").WithErr(err)
 		}
 		return err
 	}
@@ -169,6 +169,7 @@ func (s *service) Execute(ctx context.Context, id int64, command string) (string
 			return "", fmt.Errorf("execute command on server %d: %w", id, err)
 		}
 		return "", errs.ErrBadGateway.
+			WithCode("GAME_SERVER_UNAVAILABLE").
 			WithMessage("game server is unavailable or rejected the command").
 			WithErr(err)
 	}
@@ -202,12 +203,13 @@ func (s *service) register(srv *model.Server) error {
 		switch {
 		case errors.Is(err, scheduler.ErrServerExists):
 			return errs.ErrConflict.
+				WithCode("SERVER_ALREADY_REGISTERED").
 				WithMessage("server already registered").
 				WithErr(err)
 		case errors.Is(err, coreserver.ErrEmptyAddress),
 			errors.Is(err, coreserver.ErrInvalidPort),
 			errors.Is(err, scheduler.ErrUnsupportedType):
-			return errs.ErrBadRequest.WithMessage(err.Error()).WithErr(err)
+			return errs.ErrBadRequest.WithCode("INVALID_SERVER").WithMessage(err.Error()).WithErr(err)
 		default:
 			return fmt.Errorf("register server in scheduler: %w", err)
 		}
@@ -219,7 +221,7 @@ func (s *service) getByID(ctx context.Context, id int64, opts ...Option) (*model
 	srv, err := s.repo.GetByID(ctx, id, opts...)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			return nil, errs.ErrNotFound.WithMessage("server not found").WithErr(err)
+			return nil, errs.ErrNotFound.WithCode("SERVER_NOT_FOUND").WithMessage("server not found").WithErr(err)
 		}
 		return nil, err
 	}

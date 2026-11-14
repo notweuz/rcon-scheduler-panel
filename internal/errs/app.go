@@ -1,16 +1,19 @@
 package errs
 
-type FieldError struct {
-	Code  string `json:"code"`
-	Param string `json:"param,omitempty"`
+type Violation struct {
+	Field string
+	Code  string
+	Param string
 }
 
 type AppError struct {
-	Kind    Kind
-	Code    string
-	Message string
-	Err     error
-	Fields  map[string]FieldError
+	Kind       Kind
+	Code       string
+	Message    string
+	Err        error
+	Violations []Violation
+
+	base *AppError
 }
 
 func (e *AppError) Error() string {
@@ -25,27 +28,44 @@ func (e *AppError) Is(target error) bool {
 	if !ok {
 		return false
 	}
-	return e.Kind == t.Kind && e.Code == t.Code
+	if e.Kind == t.Kind && e.Code == t.Code {
+		return true
+	}
+	return e.base != nil && e.base == t
 }
 
 func (e *AppError) Unwrap() error { return e.Err }
 
-func (e *AppError) WithMessage(msg string) *AppError {
+func (e *AppError) clone() *AppError {
 	cp := *e
-	cp.Message = msg
+	if cp.base == nil {
+		cp.base = e
+	}
 	return &cp
+}
+
+func (e *AppError) WithCode(code string) *AppError {
+	cp := e.clone()
+	cp.Code = code
+	return cp
+}
+
+func (e *AppError) WithMessage(msg string) *AppError {
+	cp := e.clone()
+	cp.Message = msg
+	return cp
 }
 
 func (e *AppError) WithErr(err error) *AppError {
-	cp := *e
+	cp := e.clone()
 	cp.Err = err
-	return &cp
+	return cp
 }
 
-func (e *AppError) WithFields(f map[string]FieldError) *AppError {
-	cp := *e
-	cp.Fields = f
-	return &cp
+func (e *AppError) WithViolations(v []Violation) *AppError {
+	cp := e.clone()
+	cp.Violations = v
+	return cp
 }
 
 func New(kind Kind, code, message string) *AppError {

@@ -24,7 +24,7 @@ func (s *service) GetByID(ctx context.Context, id int64) (*model.Protocol, error
 	protocol, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			return nil, errs.ErrNotFound.WithMessage("protocol not found").WithErr(err)
+			return nil, errs.ErrNotFound.WithCode("PROTOCOL_NOT_FOUND").WithMessage("protocol not found").WithErr(err)
 		}
 		return nil, err
 	}

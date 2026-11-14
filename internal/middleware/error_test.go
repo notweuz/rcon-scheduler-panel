@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"rcon-scheduler-panel/internal/dto/response"
 	"rcon-scheduler-panel/internal/errs"
 	"testing"
 
@@ -67,12 +68,80 @@ func TestErrorHandlerMessage(t *testing.T) {
 			r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/", nil))
 
 			var resp struct {
-				Error struct {
-					Message string `json:"message"`
-				} `json:"error"`
+				Detail string `json:"detail"`
 			}
 			require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-			assert.Equal(t, tt.want, resp.Error.Message)
+			assert.Equal(t, tt.want, resp.Detail)
 		})
 	}
+}
+
+func TestErrorHandlerProblemDetails(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	r := gin.New()
+	r.Use(ErrorHandler())
+	r.GET("/servers/:id", func(c *gin.Context) {
+		_ = c.Error(errs.ErrNotFound.WithCode("SERVER_NOT_FOUND").WithMessage("server not found"))
+	})
+	r.POST("/validate", func(c *gin.Context) {
+		_ = c.Error(errs.ErrBadRequest.WithCode("VALIDATION_FAILED").WithViolations([]errs.Violation{
+			{Field: "steps[0].command", Code: "required"},
+			{Field: "name", Code: "min", Param: "3"},
+		}))
+	})
+	r.GET("/private", func(c *gin.Context) { _ = c.Error(errs.ErrUnauthorized) })
+
+	t.Run("problem body and content type", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/servers/42?x=1", nil))
+
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		assert.Equal(t, "application/problem+json", w.Header().Get("Content-Type"))
+
+		var p response.Problem
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &p))
+		assert.Equal(t, response.Problem{
+			Title:    "Not Found",
+			Status:   http.StatusNotFound,
+			Detail:   "server not found",
+			Instance: "/servers/42",
+			Code:     "SERVER_NOT_FOUND",
+		}, p)
+	})
+
+	t.Run("validation errors", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, httptest.NewRequest(http.MethodPost, "/validate", nil))
+
+		var p response.Problem
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &p))
+		assert.Equal(t, []response.InvalidParam{
+			{Field: "steps[0].command", Code: "required"},
+			{Field: "name", Code: "min", Param: "3"},
+		}, p.Errors)
+	})
+
+	t.Run("401 sets WWW-Authenticate", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/private", nil))
+
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+		assert.Equal(t, `Bearer realm="api"`, w.Header().Get("WWW-Authenticate"))
+	})
+
+	t.Run("internal error hides code and detail", func(t *testing.T) {
+		rr := gin.New()
+		rr.Use(ErrorHandler())
+		rr.GET("/", func(c *gin.Context) {
+			_ = c.Error(errs.ErrInternalServer.WithCode("DB_DOWN").WithMessage("secret"))
+		})
+		w := httptest.NewRecorder()
+		rr.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/", nil))
+
+		var p response.Problem
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &p))
+		assert.Equal(t, errs.ErrInternalServer.Code, p.Code)
+		assert.Equal(t, errs.ErrInternalServer.Message, p.Detail)
+	})
 }

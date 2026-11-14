@@ -212,7 +212,7 @@ func TestAuthService_Login(t *testing.T) {
 		var appErr *errs.AppError
 		require.ErrorAs(t, err, &appErr)
 		assert.Equal(t, errs.Unauthenticated, appErr.Kind)
-		assert.Equal(t, "invalid credentials", appErr.Message)
+		assert.Equal(t, "invalid username or password", appErr.Message)
 	})
 
 	t.Run("Service error is not masked as 401", func(t *testing.T) {

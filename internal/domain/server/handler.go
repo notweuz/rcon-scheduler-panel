@@ -44,10 +44,11 @@ func NewHandler(service Service, cfg *config.Config) *Handler {
 //	@Produce		json
 //	@Security		BearerAuth
 //	@Param			server	body		request.CreateServer	true	"Server data"
-//	@Success		201		{object}	response.Response{data=response.ServerShort}
-//	@Failure		400		{object}	response.Response{error=response.ErrorInfo}	"Validation error"
-//	@Failure		401		{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
-//	@Failure		409		{object}	response.Response{error=response.ErrorInfo}	"Server already exists"
+//	@Success		201		{object}	response.ServerShort
+//	@Failure		400		{object}	response.Problem	"Validation error"
+//	@Failure		401		{object}	response.Problem	"Missing or invalid token"
+//	@Failure		409		{object}	response.Problem	"Server already exists"
+//	@Failure		500		{object}	response.Problem	"Internal server error"
 //	@Router			/servers [post]
 func (h *Handler) Create(c *gin.Context) {
 	var serverReq request.CreateServer
@@ -79,9 +80,10 @@ func (h *Handler) Create(c *gin.Context) {
 //	@Produce	json
 //	@Security	BearerAuth
 //	@Param		id	path		int	true	"Server ID"
-//	@Success	200	{object}	response.Response{data=response.ServerShort}
-//	@Failure	401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
-//	@Failure	404	{object}	response.Response{error=response.ErrorInfo}	"Server not found"
+//	@Success	200	{object}	response.ServerShort
+//	@Failure	401	{object}	response.Problem	"Missing or invalid token"
+//	@Failure	404	{object}	response.Problem	"Server not found"
+//	@Failure	500	{object}	response.Problem	"Internal server error"
 //	@Router		/servers/{id} [get]
 func (h *Handler) GetByID(c *gin.Context) {
 	var serverID path.ServerID
@@ -105,8 +107,9 @@ func (h *Handler) GetByID(c *gin.Context) {
 //	@Tags		servers
 //	@Produce	json
 //	@Security	BearerAuth
-//	@Success	200	{object}	response.Response{data=[]response.ServerShort}
-//	@Failure	401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
+//	@Success	200	{object}	response.ServerList
+//	@Failure	401	{object}	response.Problem	"Missing or invalid token"
+//	@Failure	500	{object}	response.Problem	"Internal server error"
 //	@Router		/servers [get]
 func (h *Handler) GetAll(c *gin.Context) {
 	servers, err := h.service.GetAll(c.Request.Context())
@@ -115,11 +118,7 @@ func (h *Handler) GetAll(c *gin.Context) {
 		return
 	}
 
-	serverDTOs := make([]response.ServerShort, len(servers))
-	for i, srv := range servers {
-		serverDTOs[i] = response.ServerShortFromModel(srv)
-	}
-	respond.OK(c, serverDTOs)
+	respond.OK(c, response.MapList(servers, response.ServerShortFromModel))
 }
 
 // Update godoc
@@ -132,11 +131,12 @@ func (h *Handler) GetAll(c *gin.Context) {
 //	@Security		BearerAuth
 //	@Param			id		path		int						true	"Server ID"
 //	@Param			server	body		request.UpdateServer	true	"Server data"
-//	@Success		200		{object}	response.Response{data=response.ServerShort}
-//	@Failure		400		{object}	response.Response{error=response.ErrorInfo}	"Validation error"
-//	@Failure		401		{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
-//	@Failure		404		{object}	response.Response{error=response.ErrorInfo}	"Server or protocol not found"
-//	@Failure		409		{object}	response.Response{error=response.ErrorInfo}	"Server already registered"
+//	@Success		200		{object}	response.ServerShort
+//	@Failure		400		{object}	response.Problem	"Validation error"
+//	@Failure		401		{object}	response.Problem	"Missing or invalid token"
+//	@Failure		404		{object}	response.Problem	"Server or protocol not found"
+//	@Failure		409		{object}	response.Problem	"Server already registered"
+//	@Failure		500		{object}	response.Problem	"Internal server error"
 //	@Router			/servers/{id} [put]
 func (h *Handler) Update(c *gin.Context) {
 	var serverID path.ServerID
@@ -176,8 +176,9 @@ func (h *Handler) Update(c *gin.Context) {
 //	@Security		BearerAuth
 //	@Param			id	path	int	true	"Server ID"
 //	@Success		204	"No Content"
-//	@Failure		401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
-//	@Failure		404	{object}	response.Response{error=response.ErrorInfo}	"Server not found"
+//	@Failure		401	{object}	response.Problem	"Missing or invalid token"
+//	@Failure		404	{object}	response.Problem	"Server not found"
+//	@Failure		500	{object}	response.Problem	"Internal server error"
 //	@Router			/servers/{id} [delete]
 func (h *Handler) Delete(c *gin.Context) {
 	var serverID path.ServerID
@@ -205,11 +206,12 @@ func (h *Handler) Delete(c *gin.Context) {
 //	@Security		BearerAuth
 //	@Param			id		path		int						true	"Server ID"
 //	@Param			command	body		request.ExecuteCommand	true	"Command"
-//	@Success		200		{object}	response.Response{data=response.ExecuteResult}
-//	@Failure		400		{object}	response.Response{error=response.ErrorInfo}	"Validation error"
-//	@Failure		401		{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
-//	@Failure		404		{object}	response.Response{error=response.ErrorInfo}	"Server not found"
-//	@Failure		502		{object}	response.Response{error=response.ErrorInfo}	"Server did not respond over RCON"
+//	@Success		200		{object}	response.ExecuteResult
+//	@Failure		400		{object}	response.Problem	"Validation error"
+//	@Failure		401		{object}	response.Problem	"Missing or invalid token"
+//	@Failure		404		{object}	response.Problem	"Server not found"
+//	@Failure		502		{object}	response.Problem	"Server did not respond over RCON"
+//	@Failure		500		{object}	response.Problem	"Internal server error"
 //	@Router			/servers/{id}/execute [post]
 func (h *Handler) Execute(c *gin.Context) {
 	var executeCommand request.ExecuteCommand
@@ -230,9 +232,7 @@ func (h *Handler) Execute(c *gin.Context) {
 		return
 	}
 
-	respond.OK(c, response.ExecuteResult{
-		Response: res,
-	})
+	respond.OK(c, response.ExecuteResult{Output: res})
 }
 
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {

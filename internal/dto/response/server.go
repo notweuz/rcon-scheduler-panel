@@ -39,5 +39,5 @@ func ServerShortFromModel(s model.Server) ServerShort {
 }
 
 type ExecuteResult struct {
-	Response string `json:"response"`
+	Output string `json:"output"`
 }

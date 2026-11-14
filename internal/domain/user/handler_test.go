@@ -58,14 +58,10 @@ func TestUserHandler_GetMe(t *testing.T) {
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 
-		var resp struct {
-			Success bool               `json:"success"`
-			Data    response.UserShort `json:"data"`
-		}
+		var resp response.UserShort
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
-		assert.Equal(t, int64(1), resp.Data.ID)
-		assert.Equal(t, "test", resp.Data.Username)
+		assert.Equal(t, int64(1), resp.ID)
+		assert.Equal(t, "test", resp.Username)
 		assert.NotContains(t, w.Body.String(), expectedUser.Password)
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
@@ -79,11 +75,9 @@ func TestUserHandler_GetMe(t *testing.T) {
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 
-		var resp struct {
-			Success bool `json:"success"`
-		}
+		var resp response.Problem
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.False(t, resp.Success)
+		assert.NotEmpty(t, resp.Code)
 		assert.NotContains(t, w.Body.String(), expectedUser.Password)
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
 	})

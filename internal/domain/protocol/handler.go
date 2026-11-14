@@ -37,9 +37,10 @@ func NewHandler(service Service, cfg *config.Config) *Handler {
 //	@Produce	json
 //	@Security	BearerAuth
 //	@Param		id	path		int	true	"Protocol ID"
-//	@Success	200	{object}	response.Response{data=response.Protocol}
-//	@Failure	401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
-//	@Failure	404	{object}	response.Response{error=response.ErrorInfo}	"Protocol not found"
+//	@Success	200	{object}	response.Protocol
+//	@Failure	401	{object}	response.Problem	"Missing or invalid token"
+//	@Failure	404	{object}	response.Problem	"Protocol not found"
+//	@Failure	500	{object}	response.Problem	"Internal server error"
 //	@Router		/protocols/{id} [get]
 func (h *Handler) GetByID(c *gin.Context) {
 	var protocolID path.ProtocolID
@@ -63,8 +64,9 @@ func (h *Handler) GetByID(c *gin.Context) {
 //	@Tags		protocols
 //	@Produce	json
 //	@Security	BearerAuth
-//	@Success	200	{object}	response.Response{data=[]response.Protocol}
-//	@Failure	401	{object}	response.Response{error=response.ErrorInfo}	"Missing or invalid token"
+//	@Success	200	{object}	response.ProtocolList
+//	@Failure	401	{object}	response.Problem	"Missing or invalid token"
+//	@Failure	500	{object}	response.Problem	"Internal server error"
 //	@Router		/protocols [get]
 func (h *Handler) GetAll(c *gin.Context) {
 	protocols, err := h.service.GetAll(c.Request.Context())
@@ -73,11 +75,7 @@ func (h *Handler) GetAll(c *gin.Context) {
 		return
 	}
 
-	protocolDTOs := make([]response.Protocol, len(protocols))
-	for i, p := range protocols {
-		protocolDTOs[i] = response.ProtocolFromModel(p)
-	}
-	respond.OK(c, protocolDTOs)
+	respond.OK(c, response.MapList(protocols, response.ProtocolFromModel))
 }
 
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {

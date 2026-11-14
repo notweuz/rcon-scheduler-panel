@@ -58,16 +58,12 @@ func TestProtocolHandler_GetByID(t *testing.T) {
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 
-		var resp struct {
-			Success bool `json:"success"`
-			Data    response.Protocol `json:"data"`
-		}
+		var resp response.Protocol
 		assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, expectedProtocol.ID, resp.Data.ID)
-		assert.Equal(t, expectedProtocol.Name, resp.Data.Name)
-		assert.Equal(t, *expectedProtocol.Description, resp.Data.Description)
+		assert.Equal(t, expectedProtocol.ID, resp.ID)
+		assert.Equal(t, expectedProtocol.Name, resp.Name)
+		assert.Equal(t, *expectedProtocol.Description, resp.Description)
 	})
 
 	t.Run("401 - Unauthorized", func(t *testing.T) {
@@ -79,11 +75,9 @@ func TestProtocolHandler_GetByID(t *testing.T) {
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 
-		var resp struct {
-			Success bool `json:"success"`
-		}
+		var resp response.Problem
 		assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.False(t, resp.Success)
+		assert.NotEmpty(t, resp.Code)
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
 	})
 
@@ -138,20 +132,16 @@ func TestProtocolHandler_GetAll(t *testing.T) {
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 
-		var resp struct {
-			Success bool                `json:"success"`
-			Data    []response.Protocol `json:"data"`
-		}
+		var resp response.List[response.Protocol]
 		assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
 		assert.Equal(t, http.StatusOK, w.Code)
-		require.Len(t, resp.Data, len(expectedProtocols))
-		assert.Equal(t, expectedProtocols[0].ID, resp.Data[0].ID)
-		assert.Equal(t, expectedProtocols[0].Name, resp.Data[0].Name)
-		assert.Equal(t, *expectedProtocols[0].Description, resp.Data[0].Description)
-		assert.Equal(t, expectedProtocols[1].ID, resp.Data[1].ID)
-		assert.Equal(t, expectedProtocols[1].Name, resp.Data[1].Name)
-		assert.Empty(t, resp.Data[1].Description)
+		require.Len(t, resp.Items, len(expectedProtocols))
+		assert.Equal(t, expectedProtocols[0].ID, resp.Items[0].ID)
+		assert.Equal(t, expectedProtocols[0].Name, resp.Items[0].Name)
+		assert.Equal(t, *expectedProtocols[0].Description, resp.Items[0].Description)
+		assert.Equal(t, expectedProtocols[1].ID, resp.Items[1].ID)
+		assert.Equal(t, expectedProtocols[1].Name, resp.Items[1].Name)
+		assert.Empty(t, resp.Items[1].Description)
 	})
 
 	t.Run("200 - No Protocols", func(t *testing.T) {
@@ -168,14 +158,10 @@ func TestProtocolHandler_GetAll(t *testing.T) {
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 
-		var resp struct {
-			Success bool                `json:"success"`
-			Data    []response.Protocol `json:"data"`
-		}
+		var resp response.List[response.Protocol]
 		assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Empty(t, resp.Data)
+		assert.Empty(t, resp.Items)
 	})
 
 	t.Run("401 - Unauthorized", func(t *testing.T) {
@@ -187,11 +173,9 @@ func TestProtocolHandler_GetAll(t *testing.T) {
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 
-		var resp struct {
-			Success bool `json:"success"`
-		}
+		var resp response.Problem
 		assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.False(t, resp.Success)
+		assert.NotEmpty(t, resp.Code)
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
 	})
 
@@ -209,11 +193,9 @@ func TestProtocolHandler_GetAll(t *testing.T) {
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 
-		var resp struct {
-			Success bool `json:"success"`
-		}
+		var resp response.Problem
 		assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.False(t, resp.Success)
+		assert.NotEmpty(t, resp.Code)
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
 		assert.NotContains(t, w.Body.String(), "database is down")
 	})

@@ -11,11 +11,16 @@ import (
 func Register() {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterTagNameFunc(func(field reflect.StructField) string {
-			name := strings.SplitN(field.Tag.Get("json"), ",", 2)[0]
-			if name == "-" {
-				return ""
+			for _, tag := range []string{"json", "uri", "header", "form"} {
+				name, _, _ := strings.Cut(field.Tag.Get(tag), ",")
+				if name == "-" {
+					return ""
+				}
+				if name != "" {
+					return name
+				}
 			}
-			return name
+			return ""
 		})
 	}
 }

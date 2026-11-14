@@ -104,22 +104,18 @@ func TestJobHandler_Create(t *testing.T) {
 
 		require.Equal(t, http.StatusCreated, w.Code)
 
-		var resp struct {
-			Success bool         `json:"success"`
-			Data    response.Job `json:"data"`
-		}
+		var resp response.Job
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
-		assert.Equal(t, int64(10), resp.Data.ID)
-		assert.Equal(t, int64(3), resp.Data.ServerID)
-		assert.Equal(t, validJobReq.Name, resp.Data.Name)
-		assert.Equal(t, validJobReq.Cron, resp.Data.Cron)
-		assert.True(t, resp.Data.LogResults)
+		assert.Equal(t, int64(10), resp.ID)
+		assert.Equal(t, int64(3), resp.ServerID)
+		assert.Equal(t, validJobReq.Name, resp.Name)
+		assert.Equal(t, validJobReq.Cron, resp.Cron)
+		assert.True(t, resp.LogResults)
 		assert.Equal(t, []response.Step{
 			{Command: "say Restart in 1 minute"},
 			{Wait: "1m"},
 			{Command: "quit"},
-		}, resp.Data.Steps)
+		}, resp.Steps)
 	})
 
 	t.Run("401 - Unauthorized (no token provided)", func(t *testing.T) {
@@ -172,12 +168,11 @@ func TestJobHandler_Create(t *testing.T) {
 
 		require.Equal(t, http.StatusBadRequest, w.Code)
 
-		var resp response.Response
+		var resp response.Problem
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		require.NotNil(t, resp.Error)
-		assert.Contains(t, resp.Error.Fields, "name")
-		assert.Contains(t, resp.Error.Fields, "cron")
-		assert.Contains(t, resp.Error.Fields, "steps")
+		assert.Contains(t, fieldNames(resp.Errors), "name")
+		assert.Contains(t, fieldNames(resp.Errors), "cron")
+		assert.Contains(t, fieldNames(resp.Errors), "steps")
 	})
 
 	t.Run("400 - Bad Request (invalid steps)", func(t *testing.T) {
@@ -202,11 +197,10 @@ func TestJobHandler_Create(t *testing.T) {
 
 			require.Equal(t, http.StatusBadRequest, w.Code, tt.name)
 
-			var resp response.Response
+			var resp response.Problem
 			require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-			require.NotNil(t, resp.Error, tt.name)
-			assert.Contains(t, resp.Error.Fields, "command", tt.name)
-			assert.Contains(t, resp.Error.Fields, "wait", tt.name)
+			assert.Contains(t, fieldNames(resp.Errors), "steps[0].command", tt.name)
+			assert.Contains(t, fieldNames(resp.Errors), "steps[0].wait", tt.name)
 		}
 	})
 
@@ -224,10 +218,9 @@ func TestJobHandler_Create(t *testing.T) {
 
 		require.Equal(t, http.StatusBadRequest, w.Code)
 
-		var resp response.Response
+		var resp response.Problem
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		require.NotNil(t, resp.Error)
-		assert.Equal(t, "invalid cron expression", resp.Error.Message)
+		assert.Equal(t, "invalid cron expression", resp.Detail)
 	})
 
 	t.Run("404 - Server Not Found", func(t *testing.T) {
@@ -302,13 +295,9 @@ func TestJobHandler_GetByID(t *testing.T) {
 
 		require.Equal(t, http.StatusOK, w.Code)
 
-		var resp struct {
-			Success bool         `json:"success"`
-			Data    response.Job `json:"data"`
-		}
+		var resp response.Job
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
-		assert.Equal(t, response.JobFromModel(*expectedJob), resp.Data)
+		assert.Equal(t, response.JobFromModel(*expectedJob), resp)
 	})
 
 	t.Run("401 - Unauthorized (no token provided)", func(t *testing.T) {
@@ -371,15 +360,11 @@ func TestJobHandler_GetByServerID(t *testing.T) {
 
 		require.Equal(t, http.StatusOK, w.Code)
 
-		var resp struct {
-			Success bool           `json:"success"`
-			Data    []response.Job `json:"data"`
-		}
+		var resp response.List[response.Job]
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
-		require.Len(t, resp.Data, len(expectedJobs))
+		require.Len(t, resp.Items, len(expectedJobs))
 		for i := range expectedJobs {
-			assert.Equal(t, response.JobFromModel(expectedJobs[i]), resp.Data[i])
+			assert.Equal(t, response.JobFromModel(expectedJobs[i]), resp.Items[i])
 		}
 	})
 
@@ -396,7 +381,7 @@ func TestJobHandler_GetByServerID(t *testing.T) {
 		r.ServeHTTP(w, newRequest(t, http.MethodGet, "/api/servers/3/jobs", nil, true))
 
 		require.Equal(t, http.StatusOK, w.Code)
-		assert.Contains(t, w.Body.String(), `"data":[]`)
+		assert.Contains(t, w.Body.String(), `"items":[]`)
 	})
 
 	t.Run("401 - Unauthorized (no token provided)", func(t *testing.T) {
@@ -467,16 +452,12 @@ func TestJobHandler_Update(t *testing.T) {
 
 		require.Equal(t, http.StatusOK, w.Code)
 
-		var resp struct {
-			Success bool         `json:"success"`
-			Data    response.Job `json:"data"`
-		}
+		var resp response.Job
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
-		assert.Equal(t, int64(10), resp.Data.ID)
-		assert.Equal(t, int64(3), resp.Data.ServerID)
-		assert.Equal(t, validJobReq.Name, resp.Data.Name)
-		assert.Len(t, resp.Data.Steps, len(validJobReq.Steps))
+		assert.Equal(t, int64(10), resp.ID)
+		assert.Equal(t, int64(3), resp.ServerID)
+		assert.Equal(t, validJobReq.Name, resp.Name)
+		assert.Len(t, resp.Steps, len(validJobReq.Steps))
 	})
 
 	t.Run("401 - Unauthorized (no token provided)", func(t *testing.T) {
@@ -514,10 +495,9 @@ func TestJobHandler_Update(t *testing.T) {
 
 		require.Equal(t, http.StatusBadRequest, w.Code)
 
-		var resp response.Response
+		var resp response.Problem
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		require.NotNil(t, resp.Error)
-		assert.Contains(t, resp.Error.Fields, "steps")
+		assert.Contains(t, fieldNames(resp.Errors), "steps")
 	})
 
 	t.Run("404 - Job Not Found", func(t *testing.T) {

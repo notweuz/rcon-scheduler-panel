@@ -34,12 +34,12 @@ func TestAuth(t *testing.T) {
 		{"valid token", "Bearer " + validToken, http.StatusOK, ""},
 		{"lowercase scheme", "bearer " + validToken, http.StatusOK, ""},
 		{"missing header", "", http.StatusUnauthorized, ErrTokenMissing.Message},
-		{"basic scheme", "Basic " + validToken, http.StatusUnauthorized, "invalid authorization header"},
-		{"no scheme", validToken, http.StatusUnauthorized, "invalid authorization header"},
-		{"bearer without token", "Bearer ", http.StatusUnauthorized, "invalid authorization header"},
-		{"bearer without space", "Bearer", http.StatusUnauthorized, "invalid authorization header"},
+		{"basic scheme", "Basic " + validToken, http.StatusUnauthorized, ErrInvalidAuthHeader.Message},
+		{"no scheme", validToken, http.StatusUnauthorized, ErrInvalidAuthHeader.Message},
+		{"bearer without token", "Bearer ", http.StatusUnauthorized, ErrInvalidAuthHeader.Message},
+		{"bearer without space", "Bearer", http.StatusUnauthorized, ErrInvalidAuthHeader.Message},
 		{"wrong secret", "Bearer " + foreignToken, http.StatusUnauthorized, auth.ErrJWTSignatureFailed.Message},
-		{"garbage token", "Bearer not-a-jwt", http.StatusUnauthorized, errs.ErrUnauthorized.Message},
+		{"garbage token", "Bearer not-a-jwt", http.StatusUnauthorized, auth.ErrJWTInvalid.Message},
 	}
 
 	for _, tt := range tests {
@@ -78,12 +78,10 @@ func TestAuth(t *testing.T) {
 			assert.False(t, handlerCalled)
 
 			var resp struct {
-				Error struct {
-					Message string `json:"message"`
-				} `json:"error"`
+				Detail string `json:"detail"`
 			}
 			require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-			assert.Equal(t, tt.wantMsg, resp.Error.Message)
+			assert.Equal(t, tt.wantMsg, resp.Detail)
 		})
 	}
 }

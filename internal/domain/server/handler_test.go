@@ -150,14 +150,11 @@ func TestServerHandler_GetAll(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var resp struct {
-			Success bool                   `json:"success"`
-			Data    []response.ServerShort `json:"data"`
-		}
+		var resp response.List[response.ServerShort]
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		require.Len(t, resp.Data, 1)
-		assert.Equal(t, expectedServer.ID, resp.Data[0].ID)
-		assert.Equal(t, expectedServer.Protocol.Name, resp.Data[0].Protocol)
+		require.Len(t, resp.Items, 1)
+		assert.Equal(t, expectedServer.ID, resp.Items[0].ID)
+		assert.Equal(t, expectedServer.Protocol.Name, resp.Items[0].Protocol)
 		assert.NotContains(t, w.Body.String(), expectedServer.Password)
 	})
 
@@ -227,16 +224,12 @@ func TestServerHandler_Create(t *testing.T) {
 
 		require.Equal(t, http.StatusCreated, w.Code)
 
-		var resp struct {
-			Success bool                 `json:"success"`
-			Data    response.ServerShort `json:"data"`
-		}
+		var resp response.ServerShort
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
-		assert.Equal(t, int64(42), resp.Data.ID)
-		assert.Equal(t, validReq.Name, resp.Data.Name)
-		assert.Equal(t, validReq.Address, resp.Data.Address)
-		assert.Equal(t, validReq.Port, resp.Data.Port)
+		assert.Equal(t, int64(42), resp.ID)
+		assert.Equal(t, validReq.Name, resp.Name)
+		assert.Equal(t, validReq.Address, resp.Address)
+		assert.Equal(t, validReq.Port, resp.Port)
 		assert.NotContains(t, w.Body.String(), validReq.Password)
 	})
 
@@ -276,11 +269,10 @@ func TestServerHandler_Create(t *testing.T) {
 
 		require.Equal(t, http.StatusBadRequest, w.Code)
 
-		var resp response.Response
+		var resp response.Problem
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		require.NotNil(t, resp.Error)
-		assert.Contains(t, resp.Error.Fields, "name")
-		assert.Contains(t, resp.Error.Fields, "password")
+		assert.Contains(t, fieldNames(resp.Errors), "name")
+		assert.Contains(t, fieldNames(resp.Errors), "password")
 	})
 
 	t.Run("400 - Bad Request (invalid field type)", func(t *testing.T) {
@@ -382,17 +374,13 @@ func TestServerHandler_Update(t *testing.T) {
 
 		require.Equal(t, http.StatusOK, w.Code)
 
-		var resp struct {
-			Success bool                 `json:"success"`
-			Data    response.ServerShort `json:"data"`
-		}
+		var resp response.ServerShort
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
-		assert.Equal(t, int64(1), resp.Data.ID)
-		assert.Equal(t, validReq.Name, resp.Data.Name)
-		assert.Equal(t, validReq.Address, resp.Data.Address)
-		assert.Equal(t, validReq.Port, resp.Data.Port)
-		assert.Equal(t, "Source", resp.Data.Protocol)
+		assert.Equal(t, int64(1), resp.ID)
+		assert.Equal(t, validReq.Name, resp.Name)
+		assert.Equal(t, validReq.Address, resp.Address)
+		assert.Equal(t, validReq.Port, resp.Port)
+		assert.Equal(t, "Source", resp.Protocol)
 		assert.NotContains(t, w.Body.String(), validReq.Password)
 	})
 
@@ -464,12 +452,11 @@ func TestServerHandler_Update(t *testing.T) {
 
 		require.Equal(t, http.StatusBadRequest, w.Code)
 
-		var resp response.Response
+		var resp response.Problem
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		require.NotNil(t, resp.Error)
-		assert.Contains(t, resp.Error.Fields, "name")
-		assert.Contains(t, resp.Error.Fields, "password")
-		assert.Contains(t, resp.Error.Fields, "protocol_id")
+		assert.Contains(t, fieldNames(resp.Errors), "name")
+		assert.Contains(t, fieldNames(resp.Errors), "password")
+		assert.Contains(t, fieldNames(resp.Errors), "protocol_id")
 	})
 
 	t.Run("404 - Server Not Found", func(t *testing.T) {
@@ -641,13 +628,9 @@ func TestServerHandler_Execute(t *testing.T) {
 
 		require.Equal(t, http.StatusOK, w.Code)
 
-		var resp struct {
-			Success bool                   `json:"success"`
-			Data    response.ExecuteResult `json:"data"`
-		}
+		var resp response.ExecuteResult
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.True(t, resp.Success)
-		assert.Equal(t, "players : 3 humans, 0 bots", resp.Data.Response)
+		assert.Equal(t, "players : 3 humans, 0 bots", resp.Output)
 	})
 
 	t.Run("401 - Unauthorized (no token provided)", func(t *testing.T) {
@@ -703,11 +686,10 @@ func TestServerHandler_Execute(t *testing.T) {
 
 			require.Equal(t, http.StatusBadRequest, w.Code, tt.name)
 
-			var resp response.Response
+			var resp response.Problem
 			require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-			require.NotNil(t, resp.Error, tt.name)
-			require.Contains(t, resp.Error.Fields, "command", tt.name)
-			assert.Equal(t, tt.wantTag, resp.Error.Fields["command"].Code, tt.name)
+			require.Contains(t, fieldNames(resp.Errors), "command", tt.name)
+			assert.Equal(t, tt.wantTag, fieldCode(resp.Errors, "command"), tt.name)
 		}
 	})
 
@@ -740,10 +722,9 @@ func TestServerHandler_Execute(t *testing.T) {
 
 		require.Equal(t, http.StatusBadGateway, w.Code)
 
-		var resp response.Response
+		var resp response.Problem
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		require.NotNil(t, resp.Error)
-		assert.Equal(t, "game server is unavailable or rejected the command", resp.Error.Message)
+		assert.Equal(t, "game server is unavailable or rejected the command", resp.Detail)
 	})
 
 	t.Run("500 - Internal Server Error (unexpected service error)", func(t *testing.T) {

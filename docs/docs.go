@@ -43,55 +43,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.AuthResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Token"
                         }
                     },
                     "400": {
                         "description": "Validation error",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "401": {
                         "description": "Invalid credentials",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -125,55 +95,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.AuthResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Token"
                         }
                     },
                     "400": {
                         "description": "Validation error",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "403": {
                         "description": "Registration is closed",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -206,55 +146,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.Job"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Job"
                         }
                     },
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "404": {
                         "description": "Job not found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -298,73 +208,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.Job"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Job"
                         }
                     },
                     "400": {
                         "description": "Validation error or invalid cron",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "404": {
                         "description": "Job not found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -395,37 +263,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "404": {
                         "description": "Job not found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -449,40 +299,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/response.Protocol"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.ProtocolList"
                         }
                     },
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -515,55 +344,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.Protocol"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Protocol"
                         }
                     },
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "404": {
                         "description": "Protocol not found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -587,40 +386,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/response.ServerShort"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.ServerList"
                         }
                     },
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -657,73 +435,31 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.ServerShort"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.ServerShort"
                         }
                     },
                     "400": {
                         "description": "Validation error",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "409": {
                         "description": "Server already exists",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -756,55 +492,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.ServerShort"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.ServerShort"
                         }
                     },
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "404": {
                         "description": "Server not found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -848,91 +554,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.ServerShort"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.ServerShort"
                         }
                     },
                     "400": {
                         "description": "Validation error",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "404": {
                         "description": "Server or protocol not found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "409": {
                         "description": "Server already registered",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -964,37 +616,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "404": {
                         "description": "Server not found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -1040,91 +674,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.ExecuteResult"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.ExecuteResult"
                         }
                     },
                     "400": {
                         "description": "Validation error",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "404": {
                         "description": "Server not found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "502": {
                         "description": "Server did not respond over RCON",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -1157,58 +737,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/response.Job"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.JobList"
                         }
                     },
                     "400": {
                         "description": "Validation error",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -1252,91 +799,37 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.Job"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Job"
                         }
                     },
                     "400": {
                         "description": "Validation error or invalid cron",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "404": {
                         "description": "Server not found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "409": {
                         "description": "Job already exists",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -1361,55 +854,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.UserShort"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.UserShort"
                         }
                     },
                     "401": {
                         "description": "Missing or invalid token",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/response.ErrorInfo"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Problem"
                         }
                     }
                 }
@@ -1417,17 +880,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "errs.FieldError": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "param": {
-                    "type": "string"
-                }
-            }
-        },
         "request.AuthCredentials": {
             "type": "object",
             "required": [
@@ -1568,36 +1020,28 @@ const docTemplate = `{
                 }
             }
         },
-        "response.AuthResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "response.ErrorInfo": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "fields": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/errs.FieldError"
-                    }
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "response.ExecuteResult": {
             "type": "object",
             "properties": {
-                "response": {
+                "output": {
                     "type": "string"
+                }
+            }
+        },
+        "response.InvalidParam": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "min"
+                },
+                "field": {
+                    "type": "string",
+                    "example": "name"
+                },
+                "param": {
+                    "type": "string",
+                    "example": "3"
                 }
             }
         },
@@ -1627,20 +1071,45 @@ const docTemplate = `{
                 }
             }
         },
-        "response.Meta": {
+        "response.JobList": {
             "type": "object",
             "properties": {
-                "page": {
-                    "type": "integer"
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.Job"
+                    }
+                }
+            }
+        },
+        "response.Problem": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "SERVER_NOT_FOUND"
                 },
-                "per_page": {
-                    "type": "integer"
+                "detail": {
+                    "type": "string",
+                    "example": "server not found"
                 },
-                "total": {
-                    "type": "integer"
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.InvalidParam"
+                    }
                 },
-                "total_pages": {
-                    "type": "integer"
+                "instance": {
+                    "type": "string",
+                    "example": "/api/servers/42"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 404
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Not Found"
                 }
             }
         },
@@ -1658,18 +1127,25 @@ const docTemplate = `{
                 }
             }
         },
-        "response.Response": {
+        "response.ProtocolList": {
             "type": "object",
             "properties": {
-                "data": {},
-                "error": {
-                    "$ref": "#/definitions/response.ErrorInfo"
-                },
-                "meta": {
-                    "$ref": "#/definitions/response.Meta"
-                },
-                "success": {
-                    "type": "boolean"
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.Protocol"
+                    }
+                }
+            }
+        },
+        "response.ServerList": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.ServerShort"
+                    }
                 }
             }
         },
@@ -1707,6 +1183,22 @@ const docTemplate = `{
                 },
                 "wait": {
                     "type": "string"
+                }
+            }
+        },
+        "response.Token": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "integer",
+                    "example": 2592000
+                },
+                "token_type": {
+                    "type": "string",
+                    "example": "Bearer"
                 }
             }
         },

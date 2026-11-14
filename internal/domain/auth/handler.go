@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	jwt "rcon-scheduler-panel/internal/auth"
 	"rcon-scheduler-panel/internal/dto/request"
 	"rcon-scheduler-panel/internal/dto/response"
 	"rcon-scheduler-panel/internal/transport/http/respond"
@@ -31,9 +32,10 @@ func NewHandler(svc Service) *Handler {
 //	@Accept			json
 //	@Produce		json
 //	@Param			credentials	body		request.AuthCredentials	true	"Username and password"
-//	@Success		200			{object}	response.Response{data=response.AuthResponse}
-//	@Failure		400			{object}	response.Response{error=response.ErrorInfo}	"Validation error"
-//	@Failure		401			{object}	response.Response{error=response.ErrorInfo}	"Invalid credentials"
+//	@Success		200			{object}	response.Token
+//	@Failure		400			{object}	response.Problem	"Validation error"
+//	@Failure		401			{object}	response.Problem	"Invalid credentials"
+//	@Failure		500			{object}	response.Problem	"Internal server error"
 //	@Router			/auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
 	var req request.AuthCredentials
@@ -47,7 +49,7 @@ func (h *Handler) Login(c *gin.Context) {
 		respond.Error(c, err)
 		return
 	}
-	respond.OK(c, response.AuthResponse{Token: token})
+	respond.OK(c, response.NewBearerToken(token, jwt.TokenTTL))
 }
 
 // Register godoc
@@ -58,9 +60,10 @@ func (h *Handler) Login(c *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			credentials	body		request.AuthCredentials	true	"Username and password"
-//	@Success		201			{object}	response.Response{data=response.AuthResponse}
-//	@Failure		400			{object}	response.Response{error=response.ErrorInfo}	"Validation error"
-//	@Failure		403			{object}	response.Response{error=response.ErrorInfo}	"Registration is closed"
+//	@Success		201			{object}	response.Token
+//	@Failure		400			{object}	response.Problem	"Validation error"
+//	@Failure		403			{object}	response.Problem	"Registration is closed"
+//	@Failure		500			{object}	response.Problem	"Internal server error"
 //	@Router			/auth/register [post]
 func (h *Handler) Register(c *gin.Context) {
 	var req request.AuthCredentials
@@ -74,7 +77,7 @@ func (h *Handler) Register(c *gin.Context) {
 		respond.Error(c, err)
 		return
 	}
-	respond.Created(c, response.AuthResponse{Token: token})
+	respond.Created(c, response.NewBearerToken(token, jwt.TokenTTL))
 }
 
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {

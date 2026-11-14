@@ -9,9 +9,12 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const TokenTTL = 30 * 24 * time.Hour
+
 var (
-	ErrJWTExpired         = errs.ErrUnauthorized.WithMessage("JWT expired")
-	ErrJWTSignatureFailed = errs.ErrUnauthorized.WithMessage("JWT signature is invalid")
+	ErrJWTInvalid         = errs.ErrUnauthorized.WithCode("TOKEN_INVALID").WithMessage("access token is invalid")
+	ErrJWTExpired         = errs.ErrUnauthorized.WithCode("TOKEN_EXPIRED").WithMessage("access token has expired")
+	ErrJWTSignatureFailed = errs.ErrUnauthorized.WithCode("TOKEN_INVALID").WithMessage("access token signature is invalid")
 )
 
 type Claims struct {
@@ -24,7 +27,7 @@ func GenerateToken(userID int64, secret string) (string, error) {
 	claims := Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   strconv.FormatInt(userID, 10),
-			ExpiresAt: jwt.NewNumericDate(now.Add(30 * 24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(now.Add(TokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(now),
 		},
 	}
@@ -51,7 +54,7 @@ func ParseToken(tokenString, secret string) (int64, error) {
 		case errors.Is(err, jwt.ErrTokenSignatureInvalid):
 			return 0, ErrJWTSignatureFailed.WithErr(err)
 		default:
-			return 0, errs.ErrUnauthorized.WithErr(err)
+			return 0, ErrJWTInvalid.WithErr(err)
 		}
 	}
 
@@ -59,7 +62,7 @@ func ParseToken(tokenString, secret string) (int64, error) {
 
 	userID, err := strconv.ParseInt(claims.Subject, 10, 64)
 	if err != nil || userID <= 0 {
-		return 0, errs.ErrUnauthorized
+		return 0, ErrJWTInvalid
 	}
 
 	return userID, nil

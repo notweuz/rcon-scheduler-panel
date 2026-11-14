@@ -1,12 +1,5 @@
 basePath: /api
 definitions:
-  errs.FieldError:
-    properties:
-      code:
-        type: string
-      param:
-        type: string
-    type: object
   request.AuthCredentials:
     properties:
       password:
@@ -110,25 +103,21 @@ definitions:
     - port
     - protocol_id
     type: object
-  response.AuthResponse:
-    properties:
-      token:
-        type: string
-    type: object
-  response.ErrorInfo:
-    properties:
-      code:
-        type: string
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/errs.FieldError'
-        type: object
-      message:
-        type: string
-    type: object
   response.ExecuteResult:
     properties:
-      response:
+      output:
+        type: string
+    type: object
+  response.InvalidParam:
+    properties:
+      code:
+        example: min
+        type: string
+      field:
+        example: name
+        type: string
+      param:
+        example: "3"
         type: string
     type: object
   response.Job:
@@ -148,16 +137,34 @@ definitions:
           $ref: '#/definitions/response.Step'
         type: array
     type: object
-  response.Meta:
+  response.JobList:
     properties:
-      page:
+      items:
+        items:
+          $ref: '#/definitions/response.Job'
+        type: array
+    type: object
+  response.Problem:
+    properties:
+      code:
+        example: SERVER_NOT_FOUND
+        type: string
+      detail:
+        example: server not found
+        type: string
+      errors:
+        items:
+          $ref: '#/definitions/response.InvalidParam'
+        type: array
+      instance:
+        example: /api/servers/42
+        type: string
+      status:
+        example: 404
         type: integer
-      per_page:
-        type: integer
-      total:
-        type: integer
-      total_pages:
-        type: integer
+      title:
+        example: Not Found
+        type: string
     type: object
   response.Protocol:
     properties:
@@ -168,15 +175,19 @@ definitions:
       name:
         type: string
     type: object
-  response.Response:
+  response.ProtocolList:
     properties:
-      data: {}
-      error:
-        $ref: '#/definitions/response.ErrorInfo'
-      meta:
-        $ref: '#/definitions/response.Meta'
-      success:
-        type: boolean
+      items:
+        items:
+          $ref: '#/definitions/response.Protocol'
+        type: array
+    type: object
+  response.ServerList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/response.ServerShort'
+        type: array
     type: object
   response.ServerShort:
     properties:
@@ -200,6 +211,17 @@ definitions:
       command:
         type: string
       wait:
+        type: string
+    type: object
+  response.Token:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        example: 2592000
+        type: integer
+      token_type:
+        example: Bearer
         type: string
     type: object
   response.UserShort:
@@ -233,30 +255,19 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.AuthResponse'
-              type: object
+            $ref: '#/definitions/response.Token'
         "400":
           description: Validation error
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "401":
           description: Invalid credentials
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       summary: Login
       tags:
       - auth
@@ -278,30 +289,19 @@ paths:
         "201":
           description: Created
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.AuthResponse'
-              type: object
+            $ref: '#/definitions/response.Token'
         "400":
           description: Validation error
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "403":
           description: Registration is closed
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       summary: Register
       tags:
       - auth
@@ -319,21 +319,15 @@ paths:
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "404":
           description: Job not found
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: Delete job
@@ -352,30 +346,19 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.Job'
-              type: object
+            $ref: '#/definitions/response.Job'
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "404":
           description: Job not found
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: Get job by ID
@@ -403,39 +386,23 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.Job'
-              type: object
+            $ref: '#/definitions/response.Job'
         "400":
           description: Validation error or invalid cron
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "404":
           description: Job not found
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: Update job
@@ -449,23 +416,15 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/response.Protocol'
-                  type: array
-              type: object
+            $ref: '#/definitions/response.ProtocolList'
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: List protocols
@@ -485,30 +444,19 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.Protocol'
-              type: object
+            $ref: '#/definitions/response.Protocol'
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "404":
           description: Protocol not found
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: Get protocol by ID
@@ -522,23 +470,15 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/response.ServerShort'
-                  type: array
-              type: object
+            $ref: '#/definitions/response.ServerList'
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: List servers
@@ -561,39 +501,23 @@ paths:
         "201":
           description: Created
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.ServerShort'
-              type: object
+            $ref: '#/definitions/response.ServerShort'
         "400":
           description: Validation error
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "409":
           description: Server already exists
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: Create server
@@ -614,21 +538,15 @@ paths:
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "404":
           description: Server not found
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: Delete server
@@ -647,30 +565,19 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.ServerShort'
-              type: object
+            $ref: '#/definitions/response.ServerShort'
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "404":
           description: Server not found
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: Get server by ID
@@ -698,48 +605,27 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.ServerShort'
-              type: object
+            $ref: '#/definitions/response.ServerShort'
         "400":
           description: Validation error
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "404":
           description: Server or protocol not found
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "409":
           description: Server already registered
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: Update server
@@ -768,48 +654,27 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.ExecuteResult'
-              type: object
+            $ref: '#/definitions/response.ExecuteResult'
         "400":
           description: Validation error
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "404":
           description: Server not found
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
         "502":
           description: Server did not respond over RCON
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: Execute RCON command
@@ -829,32 +694,19 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/response.Job'
-                  type: array
-              type: object
+            $ref: '#/definitions/response.JobList'
         "400":
           description: Validation error
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: List server jobs
@@ -882,48 +734,27 @@ paths:
         "201":
           description: Created
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.Job'
-              type: object
+            $ref: '#/definitions/response.Job'
         "400":
           description: Validation error or invalid cron
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "404":
           description: Server not found
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "409":
           description: Job already exists
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: Create job
@@ -938,30 +769,19 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.UserShort'
-              type: object
+            $ref: '#/definitions/response.UserShort'
         "401":
           description: Missing or invalid token
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
         "404":
           description: User not found
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/response.ErrorInfo'
-              type: object
+            $ref: '#/definitions/response.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Problem'
       security:
       - BearerAuth: []
       summary: Get current user
