@@ -56,10 +56,10 @@ func NewApp(cfg *config.Config) (App, error) {
 
 	gin.SetMode(cfg.GinMode)
 	r := gin.New()
-	r.Use(middleware.Logger())
-	r.Use(middleware.ErrorHandler())
 	r.Use(gin.CustomRecovery(middleware.Recovery()))
+	r.Use(middleware.Logger())
 	r.Use(cors.Default())
+	r.Use(middleware.ErrorHandler())
 
 	r.HandleMethodNotAllowed = true
 	r.NoRoute(middleware.NoRoute())
