@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"fmt"
+	"net/http"
 	"rcon-scheduler-panel/internal/errs"
-	"runtime/debug"
+	"rcon-scheduler-panel/internal/transport/http/respond"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -11,10 +11,16 @@ import (
 
 func Recovery() gin.RecoveryFunc {
 	return func(c *gin.Context, recovered any) {
-		cause := fmt.Errorf("panic: %v", recovered)
-		log.Error().Err(cause).Bytes("stack", debug.Stack()).Msg("panic recovered")
+		log.Error().
+            Interface("panic", recovered).
+            Stack().
+            Msg("panic recovered")
 
-		c.Abort()
-		_ = c.Error(errs.ErrInternalServer.WithErr(cause))
+		if c.Writer.Written() {
+			c.Abort()
+			return
+		}
+
+		respond.Problem(c, newProblem(c, http.StatusInternalServerError, errs.ErrInternalServer))
 	}
 }
