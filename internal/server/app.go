@@ -56,8 +56,8 @@ func NewApp(cfg *config.Config) (App, error) {
 
 	gin.SetMode(cfg.GinMode)
 	r := gin.New()
-	r.Use(gin.CustomRecovery(middleware.Recovery()))
 	r.Use(middleware.Logger())
+	r.Use(gin.CustomRecovery(middleware.Recovery()))
 	r.Use(cors.Default())
 	r.Use(middleware.ErrorHandler())
 
